@@ -54,7 +54,7 @@ module.exports.register = function (server, options, next) {
       // sso_client.request('POST', '/validate/userpermissions', {permissions: ['read', 'admin']}, request.state.ticket, function (err, response){
       sso_client.getUserPermissions(request.state.ticket, 'berlingske', function (err, response){
         console.log('cc', err, response);
-        if (err){
+        if (err || !response.subscriber){
           // return reply(err);
           reply({message: 'public resource'});
         } else {

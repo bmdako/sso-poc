@@ -34,9 +34,9 @@
       type="text/javascript"
       src="https://cdns.gigya.com/js/gigya.js?apikey=3_Pax_srwZ6L6thNGQ4d8nFGSnCU5AxIrsQo6oR0SQD-yYibdLPKCPl_iZiWVr_0Wu"></script>
 
-    <script src="/js/app.js"></script>
     <script src="/js/tools.js"></script>
     <script src="/js/hawk/browser.js"></script>
+    <script src="/js/app.js"></script>
 
   </head>
   <body>
@@ -56,6 +56,10 @@
       <br/>
       <button type="button" class="btn btn-default" onclick="getProtectedResource();">GET protected resources</button>
       <div>Message: <span id="protected-resource"></span></div>
+      <br/>
+      <br/>
+      <p><button type="button" class="btn btn-default" onclick="createSignup(4);">Signup newsletter</button></p>
+      <div>Signups: <span id="mdb-signups"></span></div>
       <br/>
       <br/>
       <a href="#" class="btn btn-default" onclick="newUserTicket();">New ticket</a>

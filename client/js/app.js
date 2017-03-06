@@ -1,5 +1,8 @@
 $( document ).ready(function() {
-  newUserTicket();
+  newUserTicket(function(){
+    getNewsletters();
+    getSignups();
+  });
 });
 
 // $(document).on("click", "#loginDiv", function() {
@@ -47,6 +50,10 @@ function getUserTicket(rsvp, callback){
 
 
 function newUserTicket(callback){
+  if (callback === undefined || typeof callback !== 'function'){
+    callback = function(){};
+  }
+
   gigya.accounts.getAccountInfo({
     callback: function(response){
       console.log('accounts.getAccountInfo', response);
@@ -58,14 +65,17 @@ function newUserTicket(callback){
         if (rsvp){
           getUserTicket(rsvp, function(){
             removeUrlVar('rsvp');
+            callback(null, response);
           });
         } else if(ticket){
           console.log('User has ticket!!!');
+          callback(null, response);
         } else {
           requestSso('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
             console.log('RSVP', rsvp);
             getUserTicket(rsvp, function(ticket){
               removeUrlVar('rsvp');
+              callback(null, response);
             });
           });
         }
@@ -74,8 +84,10 @@ function newUserTicket(callback){
         $('#gigya-loginButton').hide();
         $('#gigya-logoutButton').show();
 
+
       } else if (response.status === 'FAIL') {
         $('#gigya-logoutButton').hide();
+        callback(response);
       }
     }
   });
@@ -182,6 +194,70 @@ function requestSso(type, path, payload, callback){
       withCredentials: true
     },
     success: [
+      callback
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  });
+}
+
+
+function getNewsletters(callback){
+  console.log('getNewsletters start');
+  $.ajax({
+    type: 'GET',
+    url: '/newsletters',
+    contentType: 'application/json; charset=utf-8',
+    success: [
+      function(data, status, jqXHR) {
+        console.log('getNewsletters', data, status);
+      },
+      callback
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  });
+}
+
+
+function getSignups(callback){
+  var mdbSignups = $('#mdb-signups');
+  mdbSignups.text('');
+  $.ajax({
+    type: 'GET',
+    url: '/newsletters/signups',
+    contentType: 'application/json; charset=utf-8',
+    success: [
+      function(data, status, jqXHR) {
+        console.log('getSignups', data, status);
+        mdbSignups.text(data.nyhedsbreve.join(', '));
+      },
+      callback
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  });
+}
+
+
+function createSignup(nyhedsbrev_id, callback) {
+  var mdbSignups = $('#mdb-signups');
+  var payload = {
+    nyhedsbrev_id: nyhedsbrev_id
+  };
+  $.ajax({
+    type: 'POST',
+    url: '/newsletters/signups',
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify(payload),
+    success: [
+      function(data, status, jqXHR) {
+        console.log('createSignup', data, status);
+        mdbSignups.text(data.join(', '));
+      },
       callback
     ],
     error: function(jqXHR, textStatus, err) {

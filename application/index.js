@@ -4,6 +4,7 @@
 const Hapi = require('hapi');
 const Inert = require('inert');
 const Resources = require('./resources');
+const Newsletters = require('./newsletters');
 const Tickets = require('./tickets');
 
 const application = new Hapi.Server();
@@ -20,6 +21,7 @@ application.state('ticket', {
 
 application.register(Inert, () => {});
 application.register(Resources, { routes: { prefix: '/resources' } }, cb);
+application.register(Newsletters, { routes: { prefix: '/newsletters' } }, cb);
 application.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
 
 

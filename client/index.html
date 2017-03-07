@@ -45,11 +45,39 @@
 
       <h1>SSO POC - Gigya client</h1>
 
-      <div>Username: <span id="gigya-currentuser"></span></div>
-      <button id="gigya-loginButton" type="button" class="btn btn-default" onclick="gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});">Login</button>
-      <button id="gigya-logoutButton" type="button" class="btn btn-warning" onclick="gigya.accounts.logout();" style="display: none;">Log out</button>
-      <br />
-      <br />
+      <p>
+        <span id="gigya-loginButton">
+          <button type="button" class="btn btn-xs btn-default" onclick="gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});">Login</button>
+        </span>
+        <span id="gigya-logoutButton" style="display: none;">
+          <button type="button" class="btn btn-xs btn-warning" onclick="gigya.accounts.logout();">Log out</button>
+          <button type="button" class="btn btn-xs btn-info" onclick="refreshUserTicket();">Refresh ticket</button>
+          <button type="button" class="btn btn-xs btn-warning" onclick="deleteUserTicket();">Delete ticket</button>
+        </span>
+      </p>
+
+      <h2>Profiloplysninger</h2>
+
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Email</label>
+          <div class="col-sm-10">
+            <input type="email" class="form-control" id="gigya-email" placeholder="Email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Fornavn</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="gigya-firstName" placeholder="Fornavn">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Efternavn</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="gigya-lastName" placeholder="Efternavn">
+          </div>
+        </div>
+      </form>
 
 
       <h2>Mine ordrer</h2>
@@ -84,7 +112,7 @@
         <button type="button" class="btn btn-default" onclick="createSignup(4);">Signup newsletter</button>
       </p>
 
-      <h2>Testing</h2>
+      <h2>Testing area</h2>
       <button type="button" class="btn btn-default" onclick="getResources();">GET resources</button>
       <div>Message: <span id="public-resource"></span></div>
       <br/>
@@ -92,11 +120,6 @@
       <div>Message: <span id="protected-resource"></span></div>
       <br/>
       <br/>
-      <p>
-        <button type="button" class="btn btn-xs btn-primary" onclick="newUserTicket();">New ticket</button>
-        <button type="button" class="btn btn-xs btn-info" onclick="refreshUserTicket();">Refresh ticket</button>
-        <button type="button" class="btn btn-xs btn-warning" onclick="deleteUserTicket();">Slet ticket</button>
-      </p>
       <br/>
     </div>
   </body>

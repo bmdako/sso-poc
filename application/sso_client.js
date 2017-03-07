@@ -62,13 +62,13 @@ module.exports.me = function(userTicket, callback){
 };
 
 
-
 module.exports.getUserPermissions = function(userTicket, permission, callback){
   // Example using appTicket
   // callSsoServer('GET', '/permissions/'.concat(userTicket.user, '/', permission), null, appTicket, callback);
   // Example using userTicket
   callSsoServer('GET', '/permissions/'.concat(permission), null, userTicket, callback);
 };
+
 
 module.exports.setUserPermissions = function(user, permission, payload, callback){
   callSsoServer('POST', '/permissions/'.concat(user, '/', permission), payload, appTicket, callback);

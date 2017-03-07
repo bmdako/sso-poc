@@ -1,33 +1,87 @@
-$( document ).ready(function() {
-  newUserTicket(function(){
-    getNewsletters();
-    getSignups();
-  });
-});
 
-// $(document).on("click", "#loginDiv", function() {
-//     gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});
-// });
 
-// The function to run on the onLogin event
+// The function to run on the gigya onLogin event
 function onLoginEventHandler(response) {
   console.log('onLoginEventHandler', response);
-  newUserTicket();
+  bpcSignin();
 }
 
+// The function to run on the gigya onLogout event
 function onLogoutEventHandler(response){
   console.log('onLogoutEventHandler', response);
-  $('#gigya-currentuser').text('');
-  $('#gigya-currentuserpermissions').text('');
-  $('#gigya-loginButton').show();
-  $('#gigya-logoutButton').hide();
+  deleteUserTicket(); // Also reloads the page
+  // $('#gigya-loginButton').show();
+  // $('#gigya-logoutButton').hide();
+}
+
+function bpcSigninEventHandler(ticket){
+  getNewsletters();
+  getSignups();
 }
 
 
+$( document ).ready(function() {
+  bpcSignin();
+});
 
 // Add the event handler
 gigya.accounts.addEventHandlers({ onLogin: onLoginEventHandler});
 gigya.accounts.addEventHandlers({ onLogout: onLogoutEventHandler});
+
+
+
+// It's a pretty messy code. But it shows the flow.
+
+function bpcSignin(callback){
+  if (callback === undefined || typeof callback !== 'function'){
+    callback = bpcSigninEventHandler;
+  }
+
+  gigya.accounts.getAccountInfo({
+    callback: function(response){
+
+      console.log('accounts.getAccountInfo', response);
+
+      if (response.status === 'OK') {
+
+        var rsvp = getUrlVar('rsvp');
+
+        if (rsvp){
+          getUserTicket(rsvp, function(ticket){
+            removeUrlVar('rsvp');
+            callback(ticket);
+          });
+        } else if(missingTicket()){
+          requestSso('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
+            console.log('RSVP', rsvp);
+            getUserTicket(rsvp, callback);
+          });
+        } else if(isTicketExpired()){
+          console.log('Refreshing ticket');
+          refreshUserTicket(callback);
+        } else {
+          requestSso('GET', '/me', null, function(me){
+            console.log('bpc.me', me);
+            callback(readTicket());
+            if (me.statusCode === 401){
+            } else {
+            }
+          });
+        }
+
+        $('#gigya-email').val(response.profile.email);
+        $('#gigya-firstName').val(response.profile.firstName);
+        $('#gigya-lastName').val(response.profile.lastName);
+        $('#gigya-loginButton').hide();
+        $('#gigya-logoutButton').show();
+
+      } else if (response.status === 'FAIL') {
+        $('#gigya-logoutButton').hide();
+        callback(response);
+      }
+    }
+  });
+}
 
 
 function getUserTicket(rsvp, callback){
@@ -49,50 +103,6 @@ function getUserTicket(rsvp, callback){
 }
 
 
-function newUserTicket(callback){
-  if (callback === undefined || typeof callback !== 'function'){
-    callback = function(){};
-  }
-
-  gigya.accounts.getAccountInfo({
-    callback: function(response){
-      console.log('accounts.getAccountInfo', response);
-      if (response.status === 'OK') {
-
-        var ticket = readCookie('ticket');
-        var rsvp = getUrlVar('rsvp');
-
-        if (rsvp){
-          getUserTicket(rsvp, function(){
-            removeUrlVar('rsvp');
-            callback(null, response);
-          });
-        } else if(ticket){
-          console.log('User has ticket!!!');
-          callback(null, response);
-        } else {
-          requestSso('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
-            console.log('RSVP', rsvp);
-            getUserTicket(rsvp, function(ticket){
-              removeUrlVar('rsvp');
-              callback(null, response);
-            });
-          });
-        }
-
-        $('#gigya-currentuser').text(response.profile.email);
-        $('#gigya-loginButton').hide();
-        $('#gigya-logoutButton').show();
-
-
-      } else if (response.status === 'FAIL') {
-        $('#gigya-logoutButton').hide();
-        callback(response);
-      }
-    }
-  });
-}
-
 function refreshUserTicket(callback){
   $.ajax({
     type: 'GET',
@@ -100,6 +110,7 @@ function refreshUserTicket(callback){
     success: [
       function(data, status, jqXHR) {
         console.log('reissue', data, status);
+        location.reload();
       },
       callback
     ],
@@ -185,9 +196,10 @@ function requestSso(type, path, payload, callback){
     path = '';
   }
 
-  $.ajax({
+  var options = {
     type: type,
     url: 'http://localhost:8085'.concat(path),
+    headers: {},
     contentType: 'application/json; charset=utf-8',
     data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,
     xhrFields: {
@@ -198,13 +210,20 @@ function requestSso(type, path, payload, callback){
     ],
     error: function(jqXHR, textStatus, err) {
       console.error(textStatus, err.toString());
+      callback(jqXHR.responseJSON);
     }
-  });
+  };
+
+  var ticket = readTicket('ticket');
+  if (ticket !== null){
+    options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+  }
+
+  $.ajax(options);
 }
 
 
 function getNewsletters(callback){
-  console.log('getNewsletters start');
   $.ajax({
     type: 'GET',
     url: '/newsletters',

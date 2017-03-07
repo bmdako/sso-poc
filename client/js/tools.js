@@ -77,3 +77,21 @@ function b64DecodeUnicode(str) {
     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
   }).join(''));
 }
+
+function missingTicket(){
+  return readCookie('ticket') === null;
+}
+
+function hasTicket(){
+  return readCookie('ticket') !== null;
+}
+
+function readTicket(){
+  var ticket = readCookie('ticket');
+  return ticket !== null ? JSON.parse(window.atob(ticket)): null;
+}
+
+function isTicketExpired(){
+  var ticket = readTicket();
+  return ticket !== null && ticket.exp < hawk.utils.now();
+}

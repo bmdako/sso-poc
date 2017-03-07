@@ -44,14 +44,6 @@ module.exports.register = function (server, options, next) {
       }
 
       // Different examples on how to validate the userTicket
-      // sso_client.validateUserTicket(request.state.ticket, ['read', 'write'], function (err, response){
-      // sso_client.validateUserTicket(request.state.ticket, ['read'], function (err, response){
-      // sso_client.validateUserTicket(request.state.ticket, 'read', function (err, response){
-      // sso_client.validateUserTicket(request.state.ticket, [], function (err, response){
-      // sso_client.validateUserTicket(request.state.ticket, 1, function (err, response){
-      // sso_client.request('POST', '/cognito/validateuserpermissions', {permissions: 'admin'}, request.state.ticket, function (err, response){
-      // sso_client.request('POST', '/cognito/validateuserpermissions', {permissions: ['read', 'admin'], all: true}, request.state.ticket, function (err, response){
-      // sso_client.request('POST', '/validate/userpermissions', {permissions: ['read', 'admin']}, request.state.ticket, function (err, response){
       sso_client.getUserPermissions(request.state.ticket, 'berlingske', function (err, response){
         console.log('cc', err, response);
         if (err || !response.subscriber){

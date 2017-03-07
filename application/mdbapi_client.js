@@ -20,6 +20,11 @@ module.exports.getUser = function(ekstern_id, callback) {
 };
 
 
+module.exports.getUserByEmail = function(email, callback) {
+  callMdbapi('GET', '/users?email='.concat(email), null, null, callback);
+};
+
+
 module.exports.createSignup = function(ekstern_id, nyhedsbrev_id, callback) {
   doSignup('POST', ekstern_id, nyhedsbrev_id, callback);
 };

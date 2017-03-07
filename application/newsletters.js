@@ -34,9 +34,40 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
+
+
       sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
-          return reply(Boom.forbidden('Missing ekstern_id'));
+
+          // If the profile does not have ekstern_id, we try to find the ekstern_id by email.
+          // But before that, we need to find email using SSO/BPC or Gigya
+          sso_client.me(request.state.ticket, function(err, me){
+            console.log('me', err, me);
+            if(err){
+              return reply(Boom.forbidden());
+            }
+
+            // Now we can search user be email
+            mdbapi_client.getUserByEmail(me.email, function(err, result){
+              console.log('getUserByEmail', err, result);
+              if(err){
+                return reply(Boom.forbidden());
+              } else if (result.length !== 1){
+                return reply(Boom.forbidden('Missing profile in MDB'));
+              }
+
+              var user = result[0];
+
+              // And we set the ekstern_id to BPC for later usage
+              sso_client.setUserPermissions(request.state.ticket.user, 'mdb', { ekstern_id: user.ekstern_id}, function (err, response){
+                console.log('setUserPermissions mdb', err, response);
+              });
+
+              reply(null, user);
+
+            });
+          });
+
         } else {
           mdbapi_client.getUser(response.ekstern_id, reply);
         }

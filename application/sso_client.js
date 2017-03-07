@@ -57,6 +57,12 @@ module.exports.refreshUserTicket = function(userTicket, callback){
 };
 
 
+module.exports.me = function(userTicket, callback){
+  callSsoServer('GET', '/me', null, userTicket, callback);
+};
+
+
+
 module.exports.getUserPermissions = function(userTicket, permission, callback){
   // Example using appTicket
   // callSsoServer('GET', '/permissions/'.concat(userTicket.user, '/', permission), null, appTicket, callback);

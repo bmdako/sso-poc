@@ -2,6 +2,7 @@
 'use strict';
 
 const Boom = require('boom');
+const Joi = require('joi');
 const Hawk = require('hawk');
 const sso_client = require('./sso_client');
 const mdbapi_client = require('./mdbapi_client');
@@ -33,21 +34,11 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-
-      if(request.state.ticket === undefined || request.state.ticket === null){
-        return reply(Boom.unauthorized());
-      }
-
-      if (request.state.ticket.exp < Hawk.utils.now()){
-        return reply(Boom.forbidden('Ticket has expired'));
-      }
-
       sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
-        console.log('cc', err, response);
         if (err || !response.ekstern_id){
-          return reply(Boom.forbidden('Msssing ekstern_id'));
+          return reply(Boom.forbidden('Missing ekstern_id'));
         } else {
-          mdbapi_client.getSignups(response.ekstern_id, reply);
+          mdbapi_client.getUser(response.ekstern_id, reply);
         }
       });
     }
@@ -61,24 +52,49 @@ module.exports.register = function (server, options, next) {
       state: {
         parse: true,
         failAction: 'log'
+      },
+      validate: {
+        payload: {
+          nyhedsbrev_id: Joi.number().integer().min(1)
+        }
       }
     },
     handler: function(request, reply) {
 
-      if(request.state.ticket === undefined || request.state.ticket === null){
-        return reply(Boom.unauthorized());
-      }
+      var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
-      if (request.state.ticket.exp < Hawk.utils.now()){
-        return reply(Boom.forbidden('Ticket has expired'));
+      sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+        if (err || !response.ekstern_id){
+          return reply(Boom.forbidden('Missing ekstern_id'));
+        } else {
+          mdbapi_client.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
+        }
+      });
+    }
+  });
+
+
+  server.route({
+    method: 'DELETE',
+    path: '/signups',
+    config: {
+      state: {
+        parse: true,
+        failAction: 'log'
+      },
+      validate: {
+        payload: {
+          nyhedsbrev_id: Joi.number().integer().min(1)
+        }
       }
+    },
+    handler: function(request, reply) {
 
       var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
       sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
-        console.log('cc', err, response);
         if (err || !response.ekstern_id){
-          return reply(Boom.forbidden('Msssing ekstern_id'));
+          return reply(Boom.forbidden('Missing ekstern_id'));
         } else {
           mdbapi_client.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
         }

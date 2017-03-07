@@ -245,9 +245,11 @@ function getSignups(callback){
 
 function createSignup(nyhedsbrev_id, callback) {
   var mdbSignups = $('#mdb-signups');
+
   var payload = {
-    nyhedsbrev_id: nyhedsbrev_id
+    nyhedsbrev_id: nyhedsbrev_id !== undefined ? nyhedsbrev_id : parseInt($('#nyhedsbrev_id').val(), 10)
   };
+
   $.ajax({
     type: 'POST',
     url: '/newsletters/signups',

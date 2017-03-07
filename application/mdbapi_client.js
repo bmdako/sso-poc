@@ -15,21 +15,28 @@ module.exports.getNewsletters = function(query, callback) {
 };
 
 
-module.exports.getSignups = function(ekstern_id, callback) {
-  console.log('getSignups', ekstern_id);
+module.exports.getUser = function(ekstern_id, callback) {
   callMdbapi('GET', '/users/'.concat(ekstern_id), null, null, callback);
 };
 
 
 module.exports.createSignup = function(ekstern_id, nyhedsbrev_id, callback) {
-  console.log('createSignup', ekstern_id, nyhedsbrev_id);
+  doSignup('POST', ekstern_id, nyhedsbrev_id, callback);
+};
+
+
+module.exports.deleteSignup = function(ekstern_id, nyhedsbrev_id, callback) {
+  doSignup('DELETE', ekstern_id, nyhedsbrev_id, callback);
+};
+
+
+function doSignup(method, ekstern_id, nyhedsbrev_id, callback) {
   var payload = {
     location_id: MDBAPI_LOCATION,
     nyhedsbreve: [nyhedsbrev_id]
   };
-  callMdbapi('POST', '/users/'.concat(ekstern_id, '/nyhedsbreve'), payload, null, callback);
+  callMdbapi(method, '/users/'.concat(ekstern_id, '/nyhedsbreve'), payload, null, callback);
 };
-
 
 
 function callMdbapi(method, path, body, credentials, callback) {

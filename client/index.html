@@ -46,11 +46,45 @@
       <h1>SSO POC - Gigya client</h1>
 
       <div>Username: <span id="gigya-currentuser"></span></div>
-      <div>Permissions: <span id="gigya-currentuserpermissions"></span></div>
       <button id="gigya-loginButton" type="button" class="btn btn-default" onclick="gigya.accounts.showScreenSet({screenSet:'Default-RegistrationLogin'});">Login</button>
       <button id="gigya-logoutButton" type="button" class="btn btn-warning" onclick="gigya.accounts.logout();" style="display: none;">Log out</button>
       <br />
       <br />
+
+
+      <h2>Mine ordrer</h2>
+      <p>TODO</p>
+
+      <h2>Ferieændringer</h2>
+      <p>TODO</p>
+
+      <h2>Reklamation</h2>
+      <p>TODO</p>
+
+      <h2>Læs E-avisen</h2>
+      <p>TODO</p>
+
+      <h2>Køb abonnement</h2>
+      <p>TODO</p>
+
+      <h2>Nyhedsbreve</h2>
+      <div>Existing signups: <span id="mdb-signups"></span></div>
+      <form class="form-inline">
+        <div class="form-group">
+          <label class="sr-only" for="nyhedsbrev_id">Signup newsletter</label>
+          <div class="input-group">
+            <div class="input-group-addon">nyhedsbrev id</div>
+            <input type="number" class="form-control" id="nyhedsbrev_id" placeholder="nyhedsbrev id">
+            <div class="input-group-addon"></div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="createSignup();">Transfer cash</button>
+      </form>
+      <p>
+        <button type="button" class="btn btn-default" onclick="createSignup(4);">Signup newsletter</button>
+      </p>
+
+      <h2>Testing</h2>
       <button type="button" class="btn btn-default" onclick="getResources();">GET resources</button>
       <div>Message: <span id="public-resource"></span></div>
       <br/>
@@ -58,17 +92,11 @@
       <div>Message: <span id="protected-resource"></span></div>
       <br/>
       <br/>
-      <p><button type="button" class="btn btn-default" onclick="createSignup(4);">Signup newsletter</button></p>
-      <div>Signups: <span id="mdb-signups"></span></div>
-      <br/>
-      <br/>
-      <a href="#" class="btn btn-default" onclick="newUserTicket();">New ticket</a>
-      <br/>
-      <br/>
-      <a href="#" class="btn btn-default" onclick="refreshUserTicket();">Refresh ticket</a>
-      <br/>
-      <br/>
-      <p><button type="button" class="btn btn-warning" onclick="deleteUserTicket();">Slet ticket</button></p>
+      <p>
+        <button type="button" class="btn btn-xs btn-primary" onclick="newUserTicket();">New ticket</button>
+        <button type="button" class="btn btn-xs btn-info" onclick="refreshUserTicket();">Refresh ticket</button>
+        <button type="button" class="btn btn-xs btn-warning" onclick="deleteUserTicket();">Slet ticket</button>
+      </p>
       <br/>
     </div>
   </body>

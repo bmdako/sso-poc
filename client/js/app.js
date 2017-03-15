@@ -52,7 +52,7 @@ function bpcSignin(callback){
             callback(ticket);
           });
         } else if(missingTicket()){
-          requestSso('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
+          requestBpc('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
             console.log('RSVP', rsvp);
             getUserTicket(rsvp, callback);
           });
@@ -60,7 +60,7 @@ function bpcSignin(callback){
           console.log('Refreshing ticket');
           refreshUserTicket(callback);
         } else {
-          requestSso('GET', '/me', null, function(me){
+          requestBpc('GET', '/me', null, function(me){
             console.log('bpc.me', me);
             callback(readTicket());
             if (me.statusCode === 401){
@@ -186,7 +186,7 @@ function getProtectedResource(callback){
 }
 
 
-function requestSso(type, path, payload, callback){
+function requestBpc(type, path, payload, callback){
   if (callback === undefined && typeof path === 'function'){
     callback = path;
     path = '';
@@ -224,7 +224,8 @@ function requestSso(type, path, payload, callback){
 
 
 function getNewsletters(callback){
-  $.ajax({
+
+  var options = {
     type: 'GET',
     url: '/newsletters',
     contentType: 'application/json; charset=utf-8',
@@ -237,14 +238,17 @@ function getNewsletters(callback){
     error: function(jqXHR, textStatus, err) {
       console.error(textStatus, err.toString());
     }
-  });
+  };
+
+  $.ajax(options);
 }
 
 
 function getSignups(callback){
   var mdbSignups = $('#mdb-signups');
   mdbSignups.text('');
-  $.ajax({
+
+  var options = {
     type: 'GET',
     url: '/newsletters/signups',
     contentType: 'application/json; charset=utf-8',
@@ -258,7 +262,9 @@ function getSignups(callback){
     error: function(jqXHR, textStatus, err) {
       console.error(textStatus, err.toString());
     }
-  });
+  };
+
+  $.ajax(options);
 }
 
 

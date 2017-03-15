@@ -1,11 +1,15 @@
 /* jshint node: true */
 'use strict';
 
-const Boom = require('boom');
-const Hawk = require('hawk');
 const http = require('http');
 const https = require('https');
+const Boom = require('boom');
+const Hawk = require('hawk');
 var appTicket = {};
+
+module.exports.getAppTicket = function () {
+  return appTicket
+};
 
 const POC_APPLICATION_APP_ID = process.env.POC_APPLICATION_APP_ID;
 const POC_APPLICATION_APP_SECRET = process.env.POC_APPLICATION_APP_SECRET;
@@ -35,16 +39,21 @@ function getAppTicket(callback) {
 getAppTicket();
 
 function refreshAppTicket(){
-  callSsoServer('POST', '/ticket/reissue', null, appTicket, function(err, result){
+  // callSsoServer('POST', '/ticket/reissue', null, appTicket, function(err, result){
+  reissueTicket(null, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
-      console.log('refreshAppTicket (app)', result);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
   });
 };
+
+function reissueTicket(payload, ticket, callback){
+  callSsoServer('POST', '/ticket/reissue', payload, ticket, callback);
+};
+module.exports.reissueTicket = reissueTicket;
 
 
 module.exports.getUserTicket = function(rsvp, callback) {
@@ -53,7 +62,8 @@ module.exports.getUserTicket = function(rsvp, callback) {
 
 
 module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer('POST', '/ticket/reissue', null, userTicket, callback);
+  // callSsoServer('POST', '/ticket/reissue', null, userTicket, callback);
+  reissueTicket(null, userTicket, callback)
 };
 
 
@@ -73,6 +83,15 @@ module.exports.getUserPermissions = function(userTicket, permission, callback){
 module.exports.setUserPermissions = function(user, permission, payload, callback){
   callSsoServer('POST', '/permissions/'.concat(user, '/', permission), payload, appTicket, callback);
 };
+
+
+module.exports.bewit = function(uri, credentials){
+  const duration = 60 * 5;      // 5 Minutes
+  const bewit = Hawk.uri.getBewit(uri, { credentials: credentials, ttlSec: duration, ext: 'dd' });
+  // const uri = uri + '&bewit=' + bewit;
+  return bewit;
+};
+
 
 
 function callSsoServer(method, path, body, credentials, callback) {
@@ -103,7 +122,7 @@ function callSsoServer(method, path, body, credentials, callback) {
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: POC_APPLICATION_APP_ID}).field
+      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
     };
   }
 

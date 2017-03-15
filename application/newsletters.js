@@ -4,7 +4,7 @@
 const Boom = require('boom');
 const Joi = require('joi');
 const Hawk = require('hawk');
-const sso_client = require('./sso_client');
+const bpc = require('./bpc_client');
 const mdbapi_client = require('./mdbapi_client');
 
 module.exports.register = function (server, options, next) {
@@ -36,12 +36,12 @@ module.exports.register = function (server, options, next) {
     handler: function(request, reply) {
 
 
-      sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
 
           // If the profile does not have ekstern_id, we try to find the ekstern_id by email.
           // But before that, we need to find email using SSO/BPC or Gigya
-          sso_client.me(request.state.ticket, function(err, me){
+          bpc.me(request.state.ticket, function(err, me){
             console.log('me', err, me);
             if(err){
               return reply(Boom.forbidden());
@@ -59,7 +59,7 @@ module.exports.register = function (server, options, next) {
               var user = result[0];
 
               // And we set the ekstern_id to BPC for later usage
-              sso_client.setUserPermissions(request.state.ticket.user, 'mdb', { ekstern_id: user.ekstern_id}, function (err, response){
+              bpc.setUserPermissions(request.state.ticket.user, 'mdb', { ekstern_id: user.ekstern_id}, function (err, response){
                 console.log('setUserPermissions mdb', err, response);
               });
 
@@ -94,7 +94,7 @@ module.exports.register = function (server, options, next) {
 
       var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
-      sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
           return reply(Boom.forbidden('Missing ekstern_id'));
         } else {
@@ -123,7 +123,7 @@ module.exports.register = function (server, options, next) {
 
       var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
-      sso_client.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
           return reply(Boom.forbidden('Missing ekstern_id'));
         } else {

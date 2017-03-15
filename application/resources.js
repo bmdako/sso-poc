@@ -5,7 +5,7 @@ const Boom = require('boom');
 const Hawk = require('hawk');
 const http = require('http');
 const https = require('https');
-const sso_client = require('./sso_client');
+const bpc = require('./bpc_client');
 
 module.exports.register = function (server, options, next) {
 
@@ -44,7 +44,7 @@ module.exports.register = function (server, options, next) {
       }
 
       // Different examples on how to validate the userTicket
-      sso_client.getUserPermissions(request.state.ticket, 'berlingske', function (err, response){
+      bpc.getUserPermissions(request.state.ticket, 'berlingske', function (err, response){
         console.log('cc', err, response);
         if (err || !response.subscriber){
           // return reply(err);
@@ -54,7 +54,7 @@ module.exports.register = function (server, options, next) {
         }
       });
 
-      sso_client.setUserPermissions(request.state.ticket.user, 'berlingske', {subscriber: true }, function (err, response){
+      bpc.setUserPermissions(request.state.ticket.user, 'berlingske', {subscriber: true }, function (err, response){
         console.log('setUserPermissions', err, response);
       });
     }

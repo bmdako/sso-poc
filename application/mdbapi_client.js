@@ -71,7 +71,7 @@ function callMdbapi(method, path, body, credentials, callback) {
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: POC_APPLICATION_APP_ID}).field
+      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
     };
   }
 

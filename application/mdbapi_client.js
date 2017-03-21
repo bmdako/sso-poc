@@ -3,12 +3,15 @@
 
 const http = require('http');
 const Boom = require('boom');
+const Hawk = require('hawk');
 const MDBAPI_ADDRESS = process.env.MDBAPI_ADDRESS;
 const MDBAPI_PORT = process.env.MDBAPI_PORT;
 const MDBAPI_LOCATION = process.env.MDBAPI_LOCATION;
 
 console.log('Connecting to MDBAPI on host', MDBAPI_ADDRESS, 'and port', MDBAPI_PORT);
 
+module.exports.MDBAPI_LOCATION = MDBAPI_LOCATION;
+module.exports.MDBAPI_PORT = MDBAPI_PORT;
 
 module.exports.getNewsletters = function(query, callback) {
   callMdbapi('GET', '/nyhedsbreve', query, null, callback);

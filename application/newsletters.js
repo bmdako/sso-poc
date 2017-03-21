@@ -35,6 +35,42 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
 
+      // var bewit = bpc.bewit('http://'.concat(mdbapi_client.MDBAPI_LOCATION, ':', mdbapi_client.MDBAPI_PORT, '/users/me'), request.state.ticket);
+      // mdbapi_client.request('GET', '/users/me', {bewit: bewit}, null, reply);
+
+      // mdbapi_client.request('GET', '/users/me', null, request.state.ticket, reply);
+
+
+      const credentials = {
+        id: 'dh37fgj492je',
+        key: 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn',
+        algorithm: 'sha256'
+      };
+
+      // mdbapi_client.request('GET', '/users/17e3f9338f42ed83785b9549f68148d7', null, credentials, reply);
+      // mdbapi_client.request('GET', '/users/17e3f9338f42ed83785b9549f68148d7', null, request.state.ticket, reply);
+      // mdbapi_client.request('GET', '/users/17e3f9338f42ed83785b9549f68148d7', null, bpc.getAppTicket(), reply);
+
+      // bpc.request('GET', '/auth', null, request.state.ticket, function(err, response){
+      bpc.request('GET', '/auth', null, bpc.getAppTicket(), function(err, response){
+        console.log('bewit', err, response)
+
+        mdbapi_client.request('GET', '/users/17e3f9338f42ed83785b9549f68148d7', { bewit: response.bewit }, null, reply);
+      });
+
+
+      // bpc.reissueTicket({issueTo: 'mdbapi'}, request.state.ticket, function(err, newTicket){
+      // bpc.reissueTicket({issueTo: 'mdbapi'}, bpc.getAppTicket(), function(err, newTicket){
+        // console.log('//////////////reissueTicket', err, newTicket);
+
+        // mdbapi_client.request('GET', '/users/17e3f9338f42ed83785b9549f68148d7', null, newTicket, reply);
+
+        // mdbapi_client.request('GET', '/users/me', null, newTicket, reply)
+        // mdbapi_client.request('POST', '/users/me', newTicket, null, reply)
+      // });
+
+
+      return;
 
       bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){

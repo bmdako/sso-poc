@@ -100,6 +100,13 @@ function callSsoServer(method, path, body, credentials, callback) {
     body = null;
   }
 
+  var agent;
+  if(true){
+    agent =  http;
+  } else {
+    agent =  https;
+  }
+
   var parameters = [];
 
   if (method === 'GET' && body !== null && typeof body === 'object'){
@@ -122,11 +129,11 @@ function callSsoServer(method, path, body, credentials, callback) {
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
+      'Authorization': Hawk.client.header(agent.globalAgent.protocol.concat('//', options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
     };
   }
 
-  var req = http.request(options, parseReponse(callback));
+  var req = agent.request(options, parseReponse(callback));
 
   if (method !== 'GET' && body !== null && typeof body === 'object'){
     req.write(JSON.stringify(body));

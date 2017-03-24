@@ -33,3 +33,5 @@ config.sh
 
 #tmp files
 *~
+
+.idea

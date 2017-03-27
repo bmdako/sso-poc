@@ -167,19 +167,6 @@ function login(event){
 }
 
 
-function activateForgotPasswordForm(event){
-  event.preventDefault();
-  $('.loginFormInput').hide();
-  $('.forgotFormInput').show();
-}
-
-
-function deactivateForgotPasswordForm(event){
-  event.preventDefault();
-  $('.loginFormInput').show();
-  $('.forgotFormInput').hide();
-}
-
 
 function forgotPasswordSendEmail(event){
   event.preventDefault();
@@ -191,8 +178,10 @@ function forgotPasswordSendEmail(event){
     return;
   }
 
-  $('.forgotFormInput').hide();
-  $('.loginFormEmail').hide();
+  // $('.forgotFormInput').hide();
+
+  $('.loginForm').attr("disabled", true);
+  $('.forgotFormLink').hide();
 
   gigya.accounts.resetPassword({
     loginID: email,

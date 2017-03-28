@@ -10,8 +10,6 @@ function onLoginEventHandler(response) {
 function onLogoutEventHandler(response){
   console.log('onLogoutEventHandler', response);
   deleteUserTicket(); // Also reloads the page
-  // $('#gigya-loginButton').show();
-  // $('#gigya-logoutButton').hide();
 }
 
 function bpcSigninEventHandler(ticket){
@@ -21,7 +19,13 @@ function bpcSigninEventHandler(ticket){
 
 
 $( document ).ready(function() {
-  bpcSignin();
+  var pwrt = getUrlVar('pwrt');
+
+  if (pwrt) {
+    $('#resetPasswordContainer').show();
+  } else {
+    bpcSignin();
+  }
 });
 
 // Add the event handler
@@ -63,20 +67,23 @@ function bpcSignin(callback){
           requestBpc('GET', '/me', null, function(me){
             console.log('bpc.me', me);
             callback(readTicket());
-            if (me.statusCode === 401){
+            if (me && me.statusCode === 401){
             } else {
             }
           });
         }
 
-        $('#gigya-email').val(response.profile.email);
-        $('#gigya-firstName').val(response.profile.firstName);
-        $('#gigya-lastName').val(response.profile.lastName);
-        $('#gigya-loginButton').hide();
-        $('#gigya-logoutButton').show();
+        $('#loginContainer').hide();
+        $('#profileContainer').show();
+
+        $('#profileEmail').val(response.profile.email);
+        $('#firstName').val(response.profile.firstName);
+        $('#lastName').val(response.profile.lastName);
 
       } else if (response.status === 'FAIL') {
-        $('#gigya-logoutButton').hide();
+        $('#loginContainer').show();
+        $('#profileContainer').hide();
+
         callback(response);
       }
     }
@@ -142,6 +149,180 @@ function deleteUserTicket(callback){
 }
 
 
+function login(event){
+  event.preventDefault()
+
+  var email = $('#loginEmail').val();
+  var password = $('#loginPassword').val();
+
+  // TODO: Log user in Drupal-SSO too
+
+  gigya.accounts.login({
+    loginID: email,
+    password: password,
+    callback: function(response){
+      console.log('login', response);
+    }
+  });
+}
+
+
+function activateForgotPasswordForm(event){
+  event.preventDefault();
+  $('.loginFormInput').hide();
+  $('.forgotFormInput').show();
+}
+
+
+function deactivateForgotPasswordForm(event){
+  event.preventDefault();
+  $('.loginFormInput').show();
+  $('.forgotFormInput').hide();
+}
+
+
+function forgotPasswordSendEmail(event){
+  event.preventDefault();
+
+  var email = $('#loginEmail').val();
+  if (email.length === 0){
+    // TODO: use http://getbootstrap.com/css/#forms-control-validation
+    alert('Indtast email.');
+    return;
+  }
+
+  $('.forgotFormInput').hide();
+  $('.loginFormEmail').hide();
+
+  gigya.accounts.resetPassword({
+    loginID: email,
+    callback: function(response){
+      console.log('resetPassword', response);
+
+      if(response.status === 'OK'){
+        $('.forgotFormDone').show();
+      } else {
+        console.error(response);
+        $('.forgotFormError').show();
+      }
+    }
+  });
+}
+
+function resetPassword(event){
+  event.preventDefault();
+
+  var pwrt = getUrlVar('pwrt');
+  var newPassword = $('#newPasswordReset').val();
+
+  if(newPassword !== $('#newPasswordResetRepeat').val()){
+    // TODO: use http://getbootstrap.com/css/#forms-control-validation
+    alert('Kodeord stemmer ikke overens.');
+    return;
+  }
+
+  gigya.accounts.resetPassword({
+    passwordResetToken: pwrt,
+    newPassword: newPassword,
+    callback: function(response){
+      console.log('resetPassword', response);
+
+      if(response.status === 'OK'){
+        location = location.origin;
+      } else {
+        console.error(response);
+        alert('Der skete en fejl.');
+        // TODO
+      }
+    }
+  });
+}
+
+
+function changePassword(event){
+  event.preventDefault();
+  var email;
+  var newPassword = $('#newPassword').val();
+
+  if(newPassword !== $('#newPasswordRepeat').val()){
+    // TODO: use http://getbootstrap.com/css/#forms-control-validation
+    alert('Kodeord stemmer ikke overens.');
+    return;
+  }
+
+  gigya.accounts.getAccountInfo({
+    callback: function(response){
+
+      console.log('accounts.getAccountInfo', response);
+
+      var payload = {
+        email: response.profile.email, // used for validating with BPC - it's using the userTicket
+        newPassword: newPassword
+      };
+
+      requestBpc('POST', '/me/changepassword', payload, function(changepassword){
+        // TODO: Test if theres an error
+
+        var login_params = {
+          loginID: email,
+          password: payload.newPassword
+        };
+
+        // TODO: We must change the password in Drupal/SSO too!!!
+
+        // We have to log the use in again
+        gigya.accounts.login({
+          loginID: email,
+          password: payload.newPassword,
+          callback: function(response){
+            console.log('login', response);
+          }
+        });
+      });
+    }
+  });
+}
+
+
+
+function requestBpc(type, path, payload, callback){
+  if (callback === undefined && typeof path === 'function'){
+    callback = path;
+    path = '';
+  }
+
+  if (path === '/'){
+    path = '';
+  }
+
+  var options = {
+    type: type,
+    url: 'http://localhost:8085'.concat(path),
+    headers: {},
+    contentType: 'application/json; charset=utf-8',
+    data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,
+    xhrFields: {
+      withCredentials: true
+    },
+    success: [
+      callback
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+      callback(jqXHR.responseJSON);
+    }
+  };
+
+  var ticket = readTicket('ticket');
+  if (ticket !== null){
+    options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+  }
+
+  $.ajax(options);
+}
+
+
+
 function getResources(callback){
   var resource = $('#public-resource');
   resource.text('');
@@ -183,43 +364,6 @@ function getProtectedResource(callback){
       protectedResource.text('Ingen adgang');
     }
   });
-}
-
-
-function requestBpc(type, path, payload, callback){
-  if (callback === undefined && typeof path === 'function'){
-    callback = path;
-    path = '';
-  }
-
-  if (path === '/'){
-    path = '';
-  }
-
-  var options = {
-    type: type,
-    url: 'http://localhost:8085'.concat(path),
-    headers: {},
-    contentType: 'application/json; charset=utf-8',
-    data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,
-    xhrFields: {
-      withCredentials: true
-    },
-    success: [
-      callback
-    ],
-    error: function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
-      callback(jqXHR.responseJSON);
-    }
-  };
-
-  var ticket = readTicket('ticket');
-  if (ticket !== null){
-    options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
-  }
-
-  $.ajax(options);
 }
 
 

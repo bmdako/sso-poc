@@ -231,7 +231,6 @@ function resetPassword(event){
       }
     }
   });
-      }
 }
 
 

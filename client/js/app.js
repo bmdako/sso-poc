@@ -184,6 +184,8 @@ function forgotPasswordSendEmail(event){
     return;
   }
 
+  // TODO: If we use the Gigya email-flow, which we propably don't, we must change the password in Drupal/SSO too!!!
+
   // $('.forgotFormInput').hide();
 
   $('.loginForm').attr("disabled", true);

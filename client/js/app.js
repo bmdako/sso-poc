@@ -13,6 +13,12 @@ function onLogoutEventHandler(response){
 }
 
 function bpcSigninEventHandler(ticket){
+  var returnUrl = getUrlVar('returnUrl');
+  if (returnUrl) {
+    window.location.href = returnUrl;
+    return;
+  }
+
   getNewsletters();
   getSignups();
 }
@@ -225,6 +231,7 @@ function resetPassword(event){
       }
     }
   });
+      }
 }
 
 
@@ -232,6 +239,7 @@ function changePassword(event){
   event.preventDefault();
   var email;
   var newPassword = $('#newPassword').val();
+  var existingPassword = $('#existingPassword').val();
 
   if(newPassword !== $('#newPasswordRepeat').val()){
     // TODO: use http://getbootstrap.com/css/#forms-control-validation
@@ -239,37 +247,57 @@ function changePassword(event){
     return;
   }
 
-  gigya.accounts.getAccountInfo({
-    callback: function(response){
+  const useGigyaWebSdk = true;
 
-      console.log('accounts.getAccountInfo', response);
+  // TODO: We must change the password in Drupal/SSO too!!!
 
-      var payload = {
-        email: response.profile.email, // used for validating with BPC - it's using the userTicket
-        newPassword: newPassword
-      };
+  if(useGigyaWebSdk) {
+    gigya.accounts.setAccountInfo({
+      newPassword: newPassword,
+      password: existingPassword,
+      callback: function (response) {
+        console.log('setAccountInfo', response);
+        if (response.status === 'OK'){
+          // TODO: Show that it went well
+        } else {
+          // TODO: Show an error
+        }
+      }
+    });
 
-      requestBpc('POST', '/me/changepassword', payload, function(changepassword){
-        // TODO: Test if theres an error
+  } else {
 
-        var login_params = {
-          loginID: email,
-          password: payload.newPassword
+    gigya.accounts.getAccountInfo({
+      callback: function(response){
+
+        console.log('accounts.getAccountInfo', response);
+
+        var payload = {
+          email: response.profile.email, // used for validating with BPC - it's using the userTicket
+          newPassword: newPassword
         };
 
-        // TODO: We must change the password in Drupal/SSO too!!!
+        requestBpc('POST', '/me/changepassword', payload, function(changepassword){
+          // TODO: Test if theres an error
 
-        // We have to log the use in again
-        gigya.accounts.login({
-          loginID: email,
-          password: payload.newPassword,
-          callback: function(response){
-            console.log('login', response);
-          }
+          var login_params = {
+            loginID: email,
+            password: payload.newPassword
+          };
+
+          // We have to log the use in again to update the cookie
+          gigya.accounts.login({
+            loginID: email,
+            password: payload.newPassword,
+            callback: function(response){
+              console.log('login', response);
+            }
+          });
         });
-      });
-    }
-  });
+      }
+    });
+  }
+
 }
 
 

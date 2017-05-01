@@ -162,6 +162,21 @@
       </form>
 
 
+      <h2>Nyhedsbreve</h2>
+      <div>Existing signups: <span id="mdb-signups"></span></div>
+      <form class="form-inline">
+        <div class="form-group">
+          <label class="sr-only" for="nyhedsbrev_id">Signup newsletter</label>
+          <div class="input-group">
+            <div class="input-group-addon">nyhedsbrev id</div>
+            <input type="number" class="form-control" id="nyhedsbrev_id" placeholder="nyhedsbrev id">
+            <div class="input-group-addon"></div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="createSignup();">Signup newsletter</button>
+      </form>
+
+
       <h2>Mine ordrer</h2>
       <p>TODO</p>
 
@@ -176,24 +191,6 @@
 
       <h2>Køb abonnement</h2>
       <p>TODO</p>
-
-
-      <h2>Nyhedsbreve</h2>
-      <div>Existing signups: <span id="mdb-signups"></span></div>
-      <form class="form-inline">
-        <div class="form-group">
-          <label class="sr-only" for="nyhedsbrev_id">Signup newsletter</label>
-          <div class="input-group">
-            <div class="input-group-addon">nyhedsbrev id</div>
-            <input type="number" class="form-control" id="nyhedsbrev_id" placeholder="nyhedsbrev id">
-            <div class="input-group-addon"></div>
-          </div>
-        </div>
-        <button type="button" class="btn btn-primary" onclick="createSignup();">Transfer cash</button>
-      </form>
-      <p>
-        <button type="button" class="btn btn-default" onclick="createSignup(4);">Signup newsletter</button>
-      </p>
 
       <h2>Testing area</h2>
       <button type="button" class="btn btn-default" onclick="getResources();">GET resources</button>

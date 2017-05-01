@@ -54,7 +54,8 @@ module.exports.register = function (server, options, next) {
         }
       });
 
-      bpc.setUserPermissions(request.state.ticket.user, 'berlingske', {subscriber: true }, function (err, response){
+      bpc.setUserPermissions(request.state.ticket.user, 'berlingske', {subscriber: true, tester: true }, function (err, response){
+      // bpc.setUserPermissions('gigya/dako@berlingskemedia.dk', 'berlingske', {subscriber: true, tester2: true }, function (err, response){
         console.log('setUserPermissions', err, response);
       });
     }

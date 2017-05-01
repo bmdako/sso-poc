@@ -51,7 +51,7 @@ module.exports.getAppTicket = getAppTicket;
 
 getAppTicket();
 
-function refreshAppTicket(payload){
+function refreshAppTicket(){
   callSsoServer({path: '/ticket/reissue', method: 'POST'}, payload, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
@@ -63,7 +63,9 @@ function refreshAppTicket(payload){
   });
 };
 
-module.exports.reissueTicket = refreshAppTicket;
+module.exports.reissueTicket = function (payload, ticket, callback){
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, payload, ticket, callback);
+};
 
 
 module.exports.getUserTicket = function(rsvp, callback) {

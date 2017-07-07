@@ -5,9 +5,18 @@ const http = require('http');
 const https = require('https');
 const Boom = require('boom');
 const Hawk = require('hawk');
+const Url = require('url');
 const MDBAPI_ADDRESS = process.env.MDBAPI_ADDRESS;
 const MDBAPI_PORT = process.env.MDBAPI_PORT;
 const MDBAPI_LOCATION = process.env.MDBAPI_LOCATION;
+module.exports.MDBAPI_URL = null;
+
+try {
+  module.exports.MDBAPI_URL = Url.parse(process.env.MDBAPI_URL);
+} catch (ex) {
+  console.error('Env var MDBAPI_URL missing or invalid.');
+  process.exit(1);
+}
 
 console.log('Connecting to MDBAPI on host', MDBAPI_ADDRESS, 'and port', MDBAPI_PORT);
 

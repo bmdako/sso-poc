@@ -5,12 +5,12 @@ const Boom = require('boom');
 const Hawk = require('hawk');
 const http = require('http');
 const https = require('https');
-const url = require('url');
+const Url = require('url');
 var appTicket = {};
 var BPC_URL;
 
 try {
-  BPC_URL = url.parse(process.env.BPC_URL);
+  BPC_URL = Url.parse(process.env.BPC_URL);
 } catch (ex) {
   console.error('Env var BPC_URL missing or invalid.');
   process.exit(1);
@@ -47,12 +47,10 @@ function getAppTicket() {
   });
 };
 
-module.exports.getAppTicket = getAppTicket;
-
 getAppTicket();
 
 function refreshAppTicket(){
-  callSsoServer({path: '/ticket/reissue', method: 'POST'}, payload, appTicket, function(err, result){
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
@@ -62,6 +60,7 @@ function refreshAppTicket(){
     }
   });
 };
+
 
 module.exports.reissueTicket = function (payload, ticket, callback){
   callSsoServer({path: '/ticket/reissue', method: 'POST'}, payload, ticket, callback);
@@ -74,7 +73,7 @@ module.exports.getUserTicket = function(rsvp, callback) {
 
 
 module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer({path: '/ticket/refresh', method: 'POST'}, null, userTicket, callback);
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, userTicket, callback);
 };
 
 
@@ -82,12 +81,12 @@ module.exports.getUserPermissions = function(userTicket, permission, callback){
   // Example using appTicket
   // callSsoServer('GET', '/permissions/'.concat(userTicket.user, '/', permission), null, appTicket, callback);
   // Example using userTicket
-  callSsoServer('GET', '/permissions/'.concat(permission), null, userTicket, callback);
+  callSsoServer({path: '/permissions/'.concat(permission)}, null, userTicket, callback);
 };
 
 
 module.exports.setUserPermissions = function(user, permission, payload, callback){
-  callSsoServer('POST', '/permissions/'.concat(user, '/', permission), payload, appTicket, callback);
+  callSsoServer({path: '/permissions/'.concat(user, '/', permission), method: 'POST'}, payload, appTicket, callback);
 };
 
 
@@ -113,7 +112,7 @@ function callSsoServer(options, body, credentials, callback) {
 
   var parameters = [];
 
-  if ((options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
+  if ((options.method === undefined || options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
     var temp = [];
     Object.keys(body).forEach(function (k){
       parameters.push(k.concat('=', body[k]));
@@ -124,10 +123,22 @@ function callSsoServer(options, body, credentials, callback) {
     }
   }
 
+  // In case we want a request completely without any credentials, use {} as the credentials parameter to this function
+  if (credentials === undefined || credentials === null){
+    credentials = appTicket;
+  }
+
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
-    var requestHref = url.resolve(BPC_URL.href, options.path)
+    var requestHref = Url.resolve(BPC_URL.href, options.path);
+
+    var hawkHeader = Hawk.client.header(requestHref, options.method || 'GET', {credentials: credentials, app: BPC_APP_ID});
+    if (hawkHeader.err) {
+      console.error(hawkHeader.err);
+      return callback(new Error('Hawk header: ' + hawkHeader.err));
+    }
+
     options.headers = {
-      'Authorization': Hawk.client.header(requestHref, options.method, {credentials: credentials, app: BPC_APP_ID}).field
+      'Authorization': hawkHeader.field
     };
   }
 
@@ -173,6 +184,11 @@ function parseReponse (callback) {
       if (res.statusCode > 300) {
         var err = Boom.wrap(new Error(data.error), data.statusCode, data.message);
         err.data = data;
+
+        if (res.statusCode === 401 && data.message === 'Expired ticket'){
+          getAppTicket();
+        }
+
         callback(err, null);
       }
       else

@@ -35,16 +35,16 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
 
-      if(request.state.ticket === undefined || request.state.ticket === null){
+      if(request.state.test_app_ticket === undefined || request.state.test_app_ticket === null){
         return reply(Boom.unauthorized());
       }
 
-      if (request.state.ticket.exp < Hawk.utils.now()){
+      if (request.state.test_app_ticket.exp < Hawk.utils.now()){
         return reply(Boom.forbidden('Ticket has expired'));
       }
 
       // Different examples on how to validate the userTicket
-      bpc.getUserPermissions(request.state.ticket, 'berlingske', function (err, response){
+      bpc.getUserPermissions(request.state.test_app_ticket, 'berlingske', function (err, response){
         console.log('cc', err, response);
         if (err || !response.subscriber){
           // return reply(err);
@@ -54,7 +54,8 @@ module.exports.register = function (server, options, next) {
         }
       });
 
-      bpc.setUserPermissions(request.state.ticket.user, 'berlingske', {subscriber: true }, function (err, response){
+      bpc.setUserPermissions(request.state.test_app_ticket.user, 'berlingske', {subscriber: true, tester: true }, function (err, response){
+      // bpc.setUserPermissions('gigya/dako@berlingskemedia.dk', 'berlingske', {subscriber: true, tester2: true }, function (err, response){
         console.log('setUserPermissions', err, response);
       });
     }

@@ -2,13 +2,26 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
 const Boom = require('boom');
+const Hawk = require('hawk');
+const Url = require('url');
 const MDBAPI_ADDRESS = process.env.MDBAPI_ADDRESS;
 const MDBAPI_PORT = process.env.MDBAPI_PORT;
 const MDBAPI_LOCATION = process.env.MDBAPI_LOCATION;
+module.exports.MDBAPI_URL = null;
+
+try {
+  module.exports.MDBAPI_URL = Url.parse(process.env.MDBAPI_URL);
+} catch (ex) {
+  console.error('Env var MDBAPI_URL missing or invalid.');
+  process.exit(1);
+}
 
 console.log('Connecting to MDBAPI on host', MDBAPI_ADDRESS, 'and port', MDBAPI_PORT);
 
+module.exports.MDBAPI_LOCATION = MDBAPI_LOCATION;
+module.exports.MDBAPI_PORT = MDBAPI_PORT;
 
 module.exports.getNewsletters = function(query, callback) {
   callMdbapi('GET', '/nyhedsbreve', query, null, callback);
@@ -50,6 +63,13 @@ function callMdbapi(method, path, body, credentials, callback) {
     body = null;
   }
 
+  var agent;
+  if(true){
+    agent =  http;
+  } else {
+    agent =  https;
+  }
+
   var parameters = [];
 
   if (method === 'GET' && body !== null && typeof body === 'object'){
@@ -71,11 +91,11 @@ function callMdbapi(method, path, body, credentials, callback) {
 
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header('http://'.concat(options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
+      'Authorization': Hawk.client.header(agent.globalAgent.protocol.concat('//', options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
     };
   }
 
-  var req = http.request(options, parseReponse(callback));
+  var req = agent.request(options, parseReponse(callback));
 
   if (method !== 'GET' && body !== null && typeof body === 'object'){
     req.write(JSON.stringify(body));

@@ -5,7 +5,10 @@ const Boom = require('boom');
 const Joi = require('joi');
 const Hawk = require('hawk');
 const bpc = require('./bpc_client');
-const mdbapi_client = require('./mdbapi_client');
+const mdb = require('./mdbapi_client');
+
+const BPC_APP_ID = process.env.BPC_APP_ID;
+const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
 
 module.exports.register = function (server, options, next) {
 
@@ -20,7 +23,7 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      mdbapi_client.getNewsletters({'publisher_id': '1'}, reply);
+      mdb.getNewsletters({'publisher_id': '1'}, reply);
     }
   });
 
@@ -35,20 +38,19 @@ module.exports.register = function (server, options, next) {
     },
     handler: function(request, reply) {
 
-
-      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.test_app_ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
 
           // If the profile does not have ekstern_id, we try to find the ekstern_id by email.
           // But before that, we need to find email using SSO/BPC or Gigya
-          bpc.me(request.state.ticket, function(err, me){
+          bpc.me(request.state.test_app_ticket, function(err, me){
             console.log('me', err, me);
             if(err){
               return reply(Boom.forbidden());
             }
 
-            // Now we can search user be email
-            mdbapi_client.getUserByEmail(me.email, function(err, result){
+            // Now we can search user be email - and we are doing it using a BPC userTicket
+            mdb.request('GET', '/users?email='.concat(me.email), null, request.state.test_app_ticket, function (err, result) {
               console.log('getUserByEmail', err, result);
               if(err){
                 return reply(Boom.forbidden());
@@ -59,17 +61,18 @@ module.exports.register = function (server, options, next) {
               var user = result[0];
 
               // And we set the ekstern_id to BPC for later usage
-              bpc.setUserPermissions(request.state.ticket.user, 'mdb', { ekstern_id: user.ekstern_id}, function (err, response){
+              bpc.setUserPermissions(request.state.test_app_ticket.user, 'mdb', { ekstern_id: user.ekstern_id}, function (err, response){
                 console.log('setUserPermissions mdb', err, response);
               });
 
-              reply(null, user);
-
+              mdb.request('GET', '/users/'.concat(user.ekstern_id), null, request.state.test_app_ticket, reply);
             });
           });
 
         } else {
-          mdbapi_client.getUser(response.ekstern_id, reply);
+
+          mdb.request('GET', '/users/'.concat(response.ekstern_id), null, request.state.test_app_ticket, reply);
+
         }
       });
     }
@@ -94,11 +97,11 @@ module.exports.register = function (server, options, next) {
 
       var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
-      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.test_app_ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
           return reply(Boom.forbidden('Missing ekstern_id'));
         } else {
-          mdbapi_client.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
+          mdb.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
         }
       });
     }
@@ -123,11 +126,11 @@ module.exports.register = function (server, options, next) {
 
       var nyhedsbrev_id = request.payload.nyhedsbrev_id;
 
-      bpc.getUserPermissions(request.state.ticket, 'mdb', function (err, response){
+      bpc.getUserPermissions(request.state.test_app_ticket, 'mdb', function (err, response){
         if (err || !response.ekstern_id){
           return reply(Boom.forbidden('Missing ekstern_id'));
         } else {
-          mdbapi_client.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
+          mdb.createSignup(response.ekstern_id, nyhedsbrev_id, reply);
         }
       });
     }

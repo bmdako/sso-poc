@@ -365,6 +365,16 @@ function getNewsletters(callback){
     }
   };
 
+  // options.url = 'http://localhost:8000/nyhedsbreve';
+
+  // var ticket = readTicket('ticket');
+  // if (ticket !== null){
+  //   if (options.headers === undefined){
+  //     options.headers = {};
+  //   }
+  //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+  // }
+
   $.ajax(options);
 }
 
@@ -388,6 +398,16 @@ function getSignups(callback){
       console.error(textStatus, err.toString());
     }
   };
+
+  // options.url = 'http://localhost:8000/users/me';
+
+  // var ticket = readTicket('ticket');
+  // if (ticket !== null){
+  //   if (options.headers === undefined){
+  //     options.headers = {};
+  //   }
+  //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+  // }
 
   $.ajax(options);
 }

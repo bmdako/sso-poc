@@ -10,7 +10,7 @@ const Tickets = require('./tickets');
 const application = new Hapi.Server();
 application.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
 
-application.state('ticket', {
+application.state('test_app_ticket', {
   ttl: 1000 * 60 * 60 * 24 * 30, // (one month)
   isHttpOnly: false,
   isSecure: false,

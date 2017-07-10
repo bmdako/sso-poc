@@ -54,7 +54,7 @@ function refreshAppTicket(){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
-      console.log('refreshAppTicket (console)', result);
+      console.log('refreshAppTicket', result);
       appTicket = result;
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
@@ -89,6 +89,10 @@ module.exports.setUserPermissions = function(user, permission, payload, callback
   callSsoServer({path: '/permissions/'.concat(user, '/', permission), method: 'POST'}, payload, appTicket, callback);
 };
 
+
+module.exports.me = function(userTicket, callback){
+  callSsoServer({path: '/me', method: 'GET'}, null, userTicket, callback);
+};
 
 module.exports.bewit = function(uri, credentials){
   const duration = 60 * 5;      // 5 Minutes

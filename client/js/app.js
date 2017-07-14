@@ -279,6 +279,7 @@ function requestBpc(type, path, payload, callback){
   var options = {
     type: type,
     url: 'http://localhost:8085'.concat(path),
+    // url: 'https://bpc.berlingskemedia-testing.net'.concat(path),
     headers: {},
     contentType: 'application/json; charset=utf-8',
     data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,

@@ -64,7 +64,9 @@ function bpcSignin(callback){
         } else if(missingTicket()){
           requestBpc('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
             console.log('RSVP', rsvp);
-            getUserTicket(rsvp, callback);
+            if (typeof rsvp === 'string') {
+              getUserTicket(rsvp, callback);
+            }
           });
         } else if(isTicketExpired()){
           console.log('Refreshing ticket');

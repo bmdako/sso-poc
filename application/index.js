@@ -6,6 +6,7 @@ const Inert = require('inert');
 const Resources = require('./resources');
 const Newsletters = require('./newsletters');
 const Tickets = require('./tickets');
+const Kundeunivers = require('./kundeunivers');
 
 const application = new Hapi.Server();
 application.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
@@ -23,6 +24,7 @@ application.register(Inert, () => {});
 application.register(Resources, { routes: { prefix: '/resources' } }, cb);
 application.register(Newsletters, { routes: { prefix: '/newsletters' } }, cb);
 application.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
+application.register(Kundeunivers, { routes: { prefix: '/kundeunivers' } }, cb);
 
 
 

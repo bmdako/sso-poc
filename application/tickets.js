@@ -57,7 +57,7 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      bpc.refreshUserTicket(request.test_app_ticket.ticket, function (err, userTicket){
+      bpc.refreshUserTicket(request.state.test_app_ticket, function (err, userTicket){
         console.log('refreshUserTicket', err, userTicket);
         if (err) {
           return reply(err);

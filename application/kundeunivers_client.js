@@ -28,13 +28,6 @@ function callMdbapi(method, path, body, credentials, callback) {
     body = null;
   }
 
-  var agent;
-  if(false){
-    agent =  http;
-  } else {
-    agent =  https;
-  }
-
   var parameters = [];
 
   if (method === 'GET' && body !== null && typeof body === 'object'){
@@ -55,12 +48,12 @@ function callMdbapi(method, path, body, credentials, callback) {
   };
   if (credentials !== undefined && credentials !== null && Object.keys(credentials).length > 1){
     options.headers = {
-      'Authorization': Hawk.client.header(agent.globalAgent.protocol.concat('//', options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
+      'Authorization': Hawk.client.header(https.globalAgent.protocol.concat('//', options.hostname, ':', options.port, options.path), method, {credentials: credentials, app: credentials.app }).field
     };
   }
 
 
-  var req = agent.request(options, parseReponse(callback));
+  var req = https.request(options, parseReponse(callback));
 
   if (method !== 'GET' && body !== null && typeof body === 'object'){
     console.log('stringify', JSON.stringify(body));

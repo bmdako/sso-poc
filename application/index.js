@@ -3,6 +3,7 @@
 
 const Hapi = require('hapi');
 const Inert = require('inert');
+const Bpc = require('./bpc_client');
 const Resources = require('./resources');
 const Newsletters = require('./newsletters');
 const Tickets = require('./tickets');
@@ -27,12 +28,19 @@ application.register(Tickets, { routes: { prefix: '/tickets' } }, cb);
 application.register(Kundeunivers, { routes: { prefix: '/kundeunivers' } }, cb);
 
 
-
 application.route({
   method: 'GET',
   path: '/favicon.ico',
   handler: function(request, reply){
     reply();
+  }
+});
+
+application.route({
+  method: 'GET',
+  path: '/bpc_env',
+  handler: function(request, reply){
+    reply(Bpc.env());
   }
 });
 

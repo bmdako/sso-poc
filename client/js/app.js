@@ -1,4 +1,6 @@
 
+var bpc_env;
+getBpcEnv();
 
 // The function to run on the gigya onLogin event
 function onLoginEventHandler(response) {
@@ -42,6 +44,21 @@ gigya.accounts.addEventHandlers({ onLogout: onLogoutEventHandler});
 
 // It's a pretty messy code. But it shows the flow.
 
+
+function getBpcEnv(){
+  $.ajax({
+    type: 'GET',
+    url: '/bpc_env',
+    success: function(data, status, jqXHR) {
+      console.log('bpc_env', data);
+      bpc_env = data;
+    },
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  });
+}
+
 function bpcSignin(callback){
   if (callback === undefined || typeof callback !== 'function'){
     callback = bpcSigninEventHandler;
@@ -62,7 +79,7 @@ function bpcSignin(callback){
             callback(ticket);
           });
         } else if(missingTicket()){
-          requestBpc('GET', '/rsvp?app=test_sso_app&provider=gigya'.concat('&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
+          requestBpc('GET', '/rsvp?provider=gigya'.concat('&app=', bpc_env.app_id, '&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
             console.log('RSVP', rsvp);
             if (typeof rsvp === 'string') {
               getUserTicket(rsvp, callback);
@@ -274,14 +291,13 @@ function requestBpc(type, path, payload, callback){
     path = '';
   }
 
-  if (path === '/'){
-    path = '';
+  if (path.startsWith('/')){
+    path = path.substring(1);
   }
 
   var options = {
     type: type,
-    url: 'http://localhost:8085'.concat(path),
-    // url: 'https://bpc.berlingskemedia-testing.net'.concat(path),
+    url: bpc_env.href.concat(path),
     headers: {},
     contentType: 'application/json; charset=utf-8',
     data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,

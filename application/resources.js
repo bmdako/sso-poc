@@ -26,7 +26,10 @@ module.exports.register = function (server, options, next) {
         path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
         payload: {
           // '$inc': { 'tester_tal': 1 }
-          '$mul': { 'tester_tal': 2 }
+          // '$mul': { 'tester_tal': 2 }
+          // '$addToSet': { 'tester_array': 'foerstevaerdi' }
+          // '$push': { 'tester_array': 'nyvaerdi' }
+          // '$pop': { 'tester_array': -1 }
         }
       }, function (err, response){
         console.log('tester_tal', err, response);

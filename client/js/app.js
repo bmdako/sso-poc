@@ -20,10 +20,6 @@ function bpcSigninEventHandler(ticket){
     window.location.href = returnUrl;
     return;
   }
-
-  getNewsletters();
-  getSignups();
-  validateAgainstKU();
 }
 
 
@@ -347,6 +343,7 @@ function getResources(callback){
 
 function getProtectedResource(callback){
   var protectedResource = $('#protected-resource');
+  var protectedResourceViewcounter = $('#protected-resource-viewcounter');
   protectedResource.text('');
   $.ajax({
     type: 'GET',
@@ -357,6 +354,7 @@ function getProtectedResource(callback){
       function(data, status, jqXHR) {
         console.log('getProtectedResource', data, status);
         protectedResource.text(data.message);
+        protectedResourceViewcounter.text(data.resourceViewCounter);
       },
       callback
     ],

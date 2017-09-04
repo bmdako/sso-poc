@@ -20,7 +20,25 @@ module.exports.register = function (server, options, next) {
       }
     },
     handler: function(request, reply) {
-      reply({message: 'non-protected resource'});
+
+      bpc.request({
+        method: 'PATCH',
+        path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
+        payload: {
+          // '$inc': { 'tester_tal': 1 }
+          '$mul': { 'tester_tal': 2 }
+        }
+      }, function (err, response){
+        console.log('tester_tal', err, response);
+        if (err) {
+          reply(err);
+        } else {
+          Object.assign(response, {
+            message: 'non-protected resource'
+          });
+          reply(response);
+        }
+      });
     }
   });
 
@@ -47,10 +65,25 @@ module.exports.register = function (server, options, next) {
       bpc.getUserPermissions(request.state.test_app_ticket, 'berlingske', function (err, response){
         console.log('cc', err, response);
         if (err || !response.subscriber){
+
           // return reply(err);
           reply({message: 'public resource'});
+
         } else {
-          reply({message: 'protected resource'});
+
+
+          bpc.request({
+            method: 'PATCH',
+            path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
+            payload: {
+              '$inc': { 'resourceViewCounter': 1 }
+              // '$mul': { 'resourceViewCounter': 2 }
+            }
+          }, function (err, response){
+            console.log('incResourceCounterRequest', err, response);
+            reply({message: 'protected resource', resourceViewCounter: response.resourceViewCounter});
+          });
+
         }
       });
 

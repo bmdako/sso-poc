@@ -35,7 +35,7 @@ function getAppTicket() {
     algorithm: 'sha256'
   };
 
-  callSsoServer({path: '/ticket/app', method: 'POST'}, {}, app, function(err, result){
+  callSsoServer({path: '/ticket/app', method: 'POST'}, app, function(err, result){
     if (err){
       console.error(err);
       process.exit(1);
@@ -50,7 +50,7 @@ function getAppTicket() {
 getAppTicket();
 
 function refreshAppTicket(){
-  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, appTicket, function(err, result){
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
     } else {
@@ -63,17 +63,17 @@ function refreshAppTicket(){
 
 
 module.exports.reissueTicket = function (payload, ticket, callback){
-  callSsoServer({path: '/ticket/reissue', method: 'POST'}, payload, ticket, callback);
+  callSsoServer({path: '/ticket/reissue', method: 'POST', payload: payload}, ticket, callback);
 };
 
 
 module.exports.getUserTicket = function(rsvp, callback) {
-  callSsoServer({path: '/ticket/user', method: 'POST'}, {rsvp: rsvp}, appTicket, callback);
+  callSsoServer({path: '/ticket/user', method: 'POST', payload: {rsvp: rsvp}}, appTicket, callback);
 };
 
 
 module.exports.refreshUserTicket = function(userTicket, callback){
-  callSsoServer({path: '/ticket/reissue', method: 'POST'}, null, userTicket, callback);
+  callSsoServer({path: '/ticket/reissue', method: 'POST'}, userTicket, callback);
 };
 
 
@@ -81,17 +81,17 @@ module.exports.getUserPermissions = function(userTicket, permission, callback){
   // Example using appTicket
   // callSsoServer('GET', '/permissions/'.concat(userTicket.user, '/', permission), null, appTicket, callback);
   // Example using userTicket
-  callSsoServer({path: '/permissions/'.concat(permission)}, null, userTicket, callback);
+  callSsoServer({path: '/permissions/'.concat(permission)}, userTicket, callback);
 };
 
 
 module.exports.setUserPermissions = function(user, permission, payload, callback){
-  callSsoServer({path: '/permissions/'.concat(user, '/', permission), method: 'POST'}, payload, appTicket, callback);
+  callSsoServer({path: '/permissions/'.concat(user, '/', permission), method: 'POST', payload: payload}, appTicket, callback);
 };
 
 
 module.exports.me = function(userTicket, callback){
-  callSsoServer({path: '/me', method: 'GET'}, null, userTicket, callback);
+  callSsoServer({path: '/me', method: 'GET'}, userTicket, callback);
 };
 
 module.exports.bewit = function(uri, credentials){
@@ -102,28 +102,27 @@ module.exports.bewit = function(uri, credentials){
 };
 
 
-function callSsoServer(options, body, credentials, callback) {
-  if (callback === undefined && typeof body === 'function') {
-    callback = body;
-    body = null;
-  }
+function callSsoServer(options, credentials, callback) {
 
-  options.protocol = BPC_URL.protocol;
-  options.hostname = BPC_URL.hostname;
+  Object.assign(options, {
+    protocol: BPC_URL.protocol,
+    hostname: BPC_URL.hostname
+  });
+
   if (BPC_URL.port){
     options.port = BPC_URL.port;
   }
 
-  var parameters = [];
+  if (callback === undefined && typeof credentials === 'function') {
+    callback = credentials;
+    credentials = null;
+  }
 
-  if ((options.method === undefined || options.method === null || options.method === 'GET') && body !== null && typeof body === 'object'){
-    var temp = [];
-    Object.keys(body).forEach(function (k){
-      parameters.push(k.concat('=', body[k]));
-    });
-
-    if (parameters.length > 0) {
-      options.path = options.path.concat('?', parameters.join('&'));
+  if (callback === undefined) {
+    callback = function(err) {
+      if (err) {
+        console.error(err);;
+      }
     }
   }
 
@@ -153,8 +152,13 @@ function callSsoServer(options, body, credentials, callback) {
 
   var req = reqHandler.request(options, parseReponse(callback));
 
-  if (options.method !== null && options.method !== 'GET' && body !== null && typeof body === 'object'){
-    req.write(JSON.stringify(body));
+  if (options.payload !== undefined && options.payload !== null){
+    if (typeof options.payload === 'object'){
+      req.write(JSON.stringify(options.payload));
+    } else {
+      req.write(options.payload);
+    }
+
   }
 
   req.end();

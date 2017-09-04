@@ -181,22 +181,12 @@
         </div>
         <button type="button" class="btn btn-primary" onclick="createSignup();">Signup newsletter</button>
       </form>
-
-
-      <h2>Mine ordrer</h2>
-      <p>TODO</p>
-
-      <h2>Ferieændringer</h2>
-      <p>TODO</p>
-
-      <h2>Reklamation</h2>
-      <p>TODO</p>
-
-      <h2>Læs E-avisen</h2>
-      <p>TODO</p>
-
-      <h2>Køb abonnement</h2>
-      <p>TODO</p>
+      <br/>
+      <button type="button" class="btn btn-default" onclick="getNewsletters();">GET newletters</button>
+      <br/>
+      <br/>
+      <button type="button" class="btn btn-default" onclick="getSignups();">GET signups</button>
+      <br/>
 
       <h2>Testing area</h2>
       <button type="button" class="btn btn-default" onclick="getResources();">GET resources</button>
@@ -204,6 +194,10 @@
       <br/>
       <button type="button" class="btn btn-default" onclick="getProtectedResource();">GET protected resources</button>
       <div>Message: <span id="protected-resource"></span></div>
+      <div>View counter: <span id="protected-resource-viewcounter"></span></div>
+      <br/>
+      <br/>
+      <button type="button" class="btn btn-default" onclick="validateAgainstKU();">KU validate</button>
       <br/>
       <br/>
       <br/>

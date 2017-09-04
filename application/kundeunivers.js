@@ -62,6 +62,6 @@ function test (credentials, callback){
 
   console.log('payload to validate', payload);
 
-  bpc.request({path: '/validate' , method: 'POST'}, payload, null, callback);
+  bpc.request({path: '/validate' , method: 'POST', payload: payload}, null, callback);
 
 }

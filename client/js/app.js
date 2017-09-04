@@ -23,6 +23,7 @@ function bpcSigninEventHandler(ticket){
 
   getNewsletters();
   getSignups();
+  validateAgainstKU();
 }
 
 
@@ -455,4 +456,24 @@ function createSignup(nyhedsbrev_id, callback) {
       console.error(textStatus, err.toString());
     }
   });
+}
+
+
+function validateAgainstKU(callback){
+  var options = {
+    type: 'GET',
+    url: '/kundeunivers',
+    contentType: 'application/json; charset=utf-8',
+    success: [
+      function(data, status, jqXHR) {
+        console.log('validateAgainstKU', data, status);
+      },
+      callback
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  };
+
+  $.ajax(options);
 }

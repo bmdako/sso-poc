@@ -87,9 +87,10 @@ function parseReponse (callback) {
         throw ex;
       }
 
+      console.log(data);
 
       if (res.statusCode > 300) {
-        var err = Boom.wrap(new Error(data.error), data.statusCode);
+        var err = Boom.wrap(new Error(data.error), res.statusCode);
         callback(err, null);
       }
       else

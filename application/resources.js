@@ -30,6 +30,9 @@ module.exports.register = function (server, options, next) {
           // '$addToSet': { 'tester_array': 'foerstevaerdi' }
           // '$push': { 'tester_array': 'nyvaerdi' }
           // '$pop': { 'tester_array': -1 }
+          // "$addToSet": {
+          //   "test_object.test_array_new": 200
+          // }
         }
       }, function (err, response){
         console.log('tester_tal', err, response);

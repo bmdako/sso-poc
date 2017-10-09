@@ -76,7 +76,7 @@ function bpcSignin(callback){
             callback(ticket);
           });
         } else if(missingTicket()){
-          requestBpc('GET', '/rsvp?provider=gigya'.concat('&app=', bpc_env.app_id, '&UID=', response.UID, '&UIDSignature=', response.UIDSignature, '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
+          requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', response.UID, '&UIDSignature=', encodeURIComponent(response.UIDSignature), '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
             console.log('RSVP', rsvp);
             if (typeof rsvp === 'string') {
               getUserTicket(rsvp, callback);

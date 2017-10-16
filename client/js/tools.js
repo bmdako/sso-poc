@@ -79,15 +79,15 @@ function b64DecodeUnicode(str) {
 }
 
 function missingTicket(){
-  return readCookie('ticket') === null;
+  return readCookie('test_app_ticket') === null;
 }
 
 function hasTicket(){
-  return readCookie('ticket') !== null;
+  return readCookie('test_app_ticket') !== null;
 }
 
 function readTicket(){
-  var ticket = readCookie('ticket');
+  var ticket = readCookie('test_app_ticket');
   return ticket !== null ? JSON.parse(window.atob(ticket)): null;
 }
 

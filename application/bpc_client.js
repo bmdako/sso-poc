@@ -158,7 +158,6 @@ function callSsoServer(options, credentials, callback) {
     } else {
       req.write(options.payload);
     }
-
   }
 
   req.end();

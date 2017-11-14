@@ -5,7 +5,8 @@ getBpcEnv();
 // The function to run on the gigya onLogin event
 function onLoginEventHandler(response) {
   console.log('onLoginEventHandler', response);
-  bpcSignin();
+  showProfileContainer(response);
+  bpcSignin(response);
 }
 
 // The function to run on the gigya onLogout event
@@ -29,7 +30,27 @@ $( document ).ready(function() {
   if (pwrt) {
     $('#resetPasswordContainer').show();
   } else {
-    bpcSignin();
+    gigya.accounts.getAccountInfo({
+      callback: function(response){
+        console.log('accounts.getAccountInfo', response);
+
+        if (response.status === 'OK') {
+          showProfileContainer(response);
+          bpcSignin(response);
+
+          $('#loginContainer').hide();
+        } else if (response.status === 'FAIL') {
+          $('#loginContainer').show();
+
+          // requestBpc('GET', '/rsvp?'.concat('provider=anonymous&app=', bpc_env.app_id, '&fingerprint=ZXZZZ'), {}, function(response){
+          //   console.log('anonymous RSVP', response);
+          //   getUserTicket(response.rsvp, function(ticket){
+          //     console.log('anonymous ticket', ticket);
+          //   });
+          // });
+        }
+      }
+    });
   }
 });
 
@@ -56,60 +77,52 @@ function getBpcEnv(){
   });
 }
 
-function bpcSignin(callback){
+
+function showProfileContainer(accountInfo) {
+  $('#loginContainer').hide();
+  $('#profileContainer').show();
+
+  $('#profileEmail').val(accountInfo.profile.email);
+  $('#firstName').val(accountInfo.profile.firstName);
+  $('#lastName').val(accountInfo.profile.lastName);
+}
+
+
+function bpcSignin(accountInfo, callback) {
   if (callback === undefined || typeof callback !== 'function'){
     callback = bpcSigninEventHandler;
   }
 
-  gigya.accounts.getAccountInfo({
-    callback: function(response){
+  var rsvp = getUrlVar('rsvp');
 
-      console.log('accounts.getAccountInfo', response);
-
-      if (response.status === 'OK') {
-
-        var rsvp = getUrlVar('rsvp');
-
-        if (rsvp){
-          getUserTicket(rsvp, function(ticket){
-            removeUrlVar('rsvp');
-            callback(ticket);
-          });
-        } else if(missingTicket()){
-          requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', response.UID, '&UIDSignature=', encodeURIComponent(response.UIDSignature), '&signatureTimestamp=', response.signatureTimestamp, '&email=', response.profile.email), {}, function(rsvp){
-            console.log('RSVP', rsvp);
-            if (typeof rsvp === 'string') {
-              getUserTicket(rsvp, callback);
-            }
-          });
-        } else if(isTicketExpired()){
-          console.log('Refreshing ticket');
-          refreshUserTicket(callback);
-        } else {
-          requestBpc('GET', '/me', null, function(me){
-            console.log('bpc.me', me);
-            callback(readTicket());
-            if (me && me.statusCode === 401){
-            } else {
-            }
-          });
-        }
-
-        $('#loginContainer').hide();
-        $('#profileContainer').show();
-
-        $('#profileEmail').val(response.profile.email);
-        $('#firstName').val(response.profile.firstName);
-        $('#lastName').val(response.profile.lastName);
-
-      } else if (response.status === 'FAIL') {
-        $('#loginContainer').show();
-        $('#profileContainer').hide();
-
-        callback(response);
+  if (rsvp){
+    getUserTicket(rsvp, function(ticket){
+      removeUrlVar('rsvp');
+      callback(ticket);
+    });
+  } else if(missingTicket()){
+    requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', accountInfo.UID, '&UIDSignature=', encodeURIComponent(accountInfo.UIDSignature), '&signatureTimestamp=', accountInfo.signatureTimestamp, '&email=', accountInfo.profile.email), {}, function(response){
+      console.log('RSVP', response);
+      if (typeof response === 'string') {
+        getUserTicket(response, callback);
+      } else if (response.rsvp) {
+        getUserTicket(response.rsvp, callback);
       }
-    }
-  });
+    });
+  } else if(isTicketExpired()){
+    console.log('Refreshing ticket');
+    refreshUserTicket(callback);
+  } else {
+    requestBpc('GET', '/me', null, function(me){
+      console.log('bpc.me', me);
+      callback(readTicket());
+      if (me && me.statusCode === 401){
+      } else {
+      }
+    });
+  }
+
+  return;
 }
 
 
@@ -474,4 +487,16 @@ function validateAgainstKU(callback){
   };
 
   $.ajax(options);
+}
+
+
+function setAccountInfo(){
+    gigya.accounts.setAccountInfo({
+      profile: {
+        firstName: 'Danny'
+      },
+      callback: function(res){
+        console.log('setAccountInfo', res);
+      }
+    })
 }

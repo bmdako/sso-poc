@@ -22,9 +22,11 @@ module.exports.register = function (server, options, next) {
     handler: function(request, reply) {
 
       bpc.request({
-        method: 'PATCH',
-        path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
-        payload: {
+        method: 'GET',
+        // path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
+        // path: '/permissions/berlingske'
+        path: '/permissions/berlingske?roles.0.access=calculate'
+        // payload: {
           // '$inc': { 'tester_tal': 1 }
           // '$mul': { 'tester_tal': 2 }
           // '$addToSet': { 'tester_array': 'foerstevaerdi' }
@@ -33,8 +35,11 @@ module.exports.register = function (server, options, next) {
           // "$addToSet": {
           //   "test_object.test_array_new": 200
           // }
-        }
-      }, function (err, response){
+        // }
+      },
+      request.state.test_app_ticket,
+      function (err, response){
+      // }, function (err, response){
         console.log('tester_tal', err, response);
         if (err) {
           reply(err);
@@ -47,6 +52,7 @@ module.exports.register = function (server, options, next) {
       });
     }
   });
+
 
   server.route({
     method: 'GET',
@@ -68,9 +74,18 @@ module.exports.register = function (server, options, next) {
       }
 
       // Different examples on how to validate the userTicket
-      bpc.getUserPermissions(request.state.test_app_ticket, 'berlingske', function (err, response){
-        console.log('cc', err, response);
-        if (err || !response.subscriber){
+      bpc.request({
+        method: 'GET',
+        // path: '/permissions/berlingske'
+        // path: '/permissions/berlingske?tester=true&subscriber=true'
+        // path: '/permissions/berlingske?tester_tal=6&subscriber=true'
+        path: '/permissions/berlingske?tester_tal=6&subscriber=true&tester_text=hejsa'
+      },
+      request.state.test_app_ticket,
+      function (err, response){
+        console.log('GET permissions', err, response);
+        // if (err || !response.subscriber){
+        if (err || !response.statusCode === 200){
 
           // return reply(err);
           reply({message: 'public resource'});
@@ -82,7 +97,8 @@ module.exports.register = function (server, options, next) {
             method: 'PATCH',
             path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
             payload: {
-              '$inc': { 'resourceViewCounter': 1 }
+              '$inc': { 'resourceViewCounter': 1 },
+              '$currentDate': { 'test': { '$type': 'date' } }
               // '$mul': { 'resourceViewCounter': 2 }
             }
           }, function (err, response){
@@ -93,10 +109,19 @@ module.exports.register = function (server, options, next) {
         }
       });
 
-      bpc.setUserPermissions(request.state.test_app_ticket.user, 'berlingske', {subscriber: true, tester: true }, function (err, response){
-      // bpc.setUserPermissions('gigya/dako@berlingskemedia.dk', 'berlingske', {subscriber: true, tester2: true }, function (err, response){
+
+      bpc.request({
+        method: 'POST',
+        path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
+        payload: {
+          subscriber: true,
+          tester: true,
+          tester_text: 'hejsa'
+        }
+      }, function (err, response){
         console.log('setUserPermissions', err, response);
       });
+
     }
   });
 

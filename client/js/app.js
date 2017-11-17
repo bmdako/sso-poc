@@ -42,12 +42,24 @@ $( document ).ready(function() {
         } else if (response.status === 'FAIL') {
           $('#loginContainer').show();
 
-          // requestBpc('GET', '/rsvp?'.concat('provider=anonymous&app=', bpc_env.app_id, '&fingerprint=ZXZZZ'), {}, function(response){
-          //   console.log('anonymous RSVP', response);
+          if (Fingerprint2) {
+            new Fingerprint2().get(function(result, components){
+              console.log(result); //a hash, representing your device fingerprint
+              console.log(components); // an array of FP components
+            });
+          }
+
+
+          requestBpc('GET', '/rsvp?'.concat('provider=anonymous&app=', bpc_env.app_id), {}, function(response){
+            console.log('anonymous RSVP', response);
+            var myDate = new Date();
+            myDate.setMonth(myDate.getMonth() + 12);
+            // document.cookie = "bpc_rsvp_r=" + "testing" + ";expires=" + myDate
+            //                 + ";domain=." + document.domain + ";path=/";
           //   getUserTicket(response.rsvp, function(ticket){
           //     console.log('anonymous ticket', ticket);
           //   });
-          // });
+          });
         }
       }
     });

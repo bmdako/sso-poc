@@ -13,7 +13,7 @@ var anonymous = anonymous || (function(){
   }
 
   var env = 'prod';
-  var _bpc_url = 'https://bpc.berlingskemedia.dk';
+  var _bpc_url = 'https://bpc.berlingskemedia.net';
   var _app = 'datalake_anonymous';
 
   const lib = {

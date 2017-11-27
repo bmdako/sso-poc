@@ -42,24 +42,59 @@ $( document ).ready(function() {
         } else if (response.status === 'FAIL') {
           $('#loginContainer').show();
 
-          if (Fingerprint2) {
-            new Fingerprint2().get(function(result, components){
-              console.log(result); //a hash, representing your device fingerprint
-              console.log(components); // an array of FP components
-            });
-          }
-
-
-          requestBpc('GET', '/rsvp?'.concat('provider=anonymous&app=', bpc_env.app_id), {}, function(response){
-            console.log('anonymous RSVP', response);
-            var myDate = new Date();
-            myDate.setMonth(myDate.getMonth() + 12);
-            // document.cookie = "bpc_rsvp_r=" + "testing" + ";expires=" + myDate
-            //                 + ";domain=." + document.domain + ";path=/";
-          //   getUserTicket(response.rsvp, function(ticket){
-          //     console.log('anonymous ticket', ticket);
+          // if (Fingerprint2) {
+          //   new Fingerprint2().get(function(result, components){
+          //     console.log(result); //a hash, representing your device fingerprint
+          //     console.log(components); // an array of FP components
           //   });
-          });
+          // }
+
+          // anonymous.getTicket()
+          // .done(function (data) {
+          //   console.log('getTicket', data);
+          // });
+
+
+          // requestBpc('GET', '/ticket/anonymous?'.concat('app=', bpc_env.app_id), {})
+          // .done(function(response){
+          //   console.log('anonymous ticket', response);
+          //
+          //   var ticket = response;
+          //
+          //   var expiresDate = new Date();
+          //   expiresDate.setMonth(expiresDate.getMonth() + (12 * 15));
+          //   document.cookie = "auid=" + ticket.user + ";expires=" + expiresDate
+          //                   + ";domain=." + document.domain + ";path=/";
+          //   document.cookie = "auti=" + window.btoa(JSON.stringify(ticket)) + ";expires=" + expiresDate
+          //                   + ";domain=." + document.domain + ";path=/";
+          //
+          //   // getUserTicket(response.rsvp)
+          //   // .done(function(ticket) {
+          //   //   console.log('anonymous ticket', ticket);
+          //   // });
+          //   //
+          //   // requestBpc('POST', '/ticket/user', {rsvp: response.rsvp})
+          //   // .done(function(reponse) {
+          //   //   console.log('user cors ticket response', response);
+          //   // });
+          //
+          //   // requestBpc()
+          //   var options = {
+          //     type: 'GET',
+          //     // url: bpc_env.href.concat('me'),
+          //     url: bpc_env.href.concat('permissions/anonymous'),
+          //     headers: {},
+          //     contentType: 'application/json; charset=utf-8'
+          //   };
+          //
+          //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+          //
+          //   $.ajax(options).
+          //   done(function(result) {
+          //     console.log('ME DONE', result);
+          //   });
+          //
+          // });
         }
       }
     });
@@ -76,7 +111,7 @@ gigya.accounts.addEventHandlers({ onLogout: onLogoutEventHandler});
 
 
 function getBpcEnv(){
-  $.ajax({
+  return $.ajax({
     type: 'GET',
     url: '/bpc_env',
     success: function(data, status, jqXHR) {
@@ -139,7 +174,7 @@ function bpcSignin(accountInfo, callback) {
 
 
 function getUserTicket(rsvp, callback){
-  $.ajax({
+  return $.ajax({
     type: 'POST',
     url: '/tickets',
     contentType: 'application/json; charset=utf-8',
@@ -158,7 +193,7 @@ function getUserTicket(rsvp, callback){
 
 
 function refreshUserTicket(callback){
-  $.ajax({
+  return $.ajax({
     type: 'GET',
     url: '/tickets',
     success: [
@@ -179,7 +214,7 @@ function refreshUserTicket(callback){
 
 function deleteUserTicket(callback){
   // This is not a global signout.
-  $.ajax({
+  return $.ajax({
     type: 'DELETE',
     url: '/tickets',
     success: [
@@ -310,7 +345,11 @@ function changePassword(event){
 function requestBpc(type, path, payload, callback){
   if (callback === undefined && typeof path === 'function'){
     callback = path;
-    path = '';
+    path = ''; // <- We don't need a slash (/) here
+  }
+
+  if (callback === undefined) {
+    callback = function(){};
   }
 
   if (path.startsWith('/')){
@@ -340,7 +379,7 @@ function requestBpc(type, path, payload, callback){
     options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
   }
 
-  $.ajax(options);
+  return $.ajax(options);
 }
 
 
@@ -348,7 +387,7 @@ function requestBpc(type, path, payload, callback){
 function getResources(callback){
   var resource = $('#public-resource');
   resource.text('');
-  $.ajax({
+  return $.ajax({
     type: 'GET',
     url: '/resources',
     contentType: 'application/json; charset=utf-8',
@@ -370,7 +409,7 @@ function getProtectedResource(callback){
   var protectedResource = $('#protected-resource');
   var protectedResourceViewcounter = $('#protected-resource-viewcounter');
   protectedResource.text('');
-  $.ajax({
+  return $.ajax({
     type: 'GET',
     url: '/resources/protected',
     contentType: 'application/json; charset=utf-8',
@@ -418,7 +457,7 @@ function getNewsletters(callback){
   //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
   // }
 
-  $.ajax(options);
+  return $.ajax(options);
 }
 
 
@@ -452,7 +491,7 @@ function getSignups(callback){
   //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
   // }
 
-  $.ajax(options);
+  return $.ajax(options);
 }
 
 
@@ -463,7 +502,7 @@ function createSignup(nyhedsbrev_id, callback) {
     nyhedsbrev_id: nyhedsbrev_id !== undefined ? nyhedsbrev_id : parseInt($('#nyhedsbrev_id').val(), 10)
   };
 
-  $.ajax({
+  return $.ajax({
     type: 'POST',
     url: '/newsletters/signups',
     contentType: 'application/json; charset=utf-8',
@@ -498,17 +537,17 @@ function validateAgainstKU(callback){
     }
   };
 
-  $.ajax(options);
+  return $.ajax(options);
 }
 
 
 function setAccountInfo(){
-    gigya.accounts.setAccountInfo({
-      profile: {
-        firstName: 'Danny'
-      },
-      callback: function(res){
-        console.log('setAccountInfo', res);
-      }
-    })
+  gigya.accounts.setAccountInfo({
+    profile: {
+      firstName: 'Danny'
+    },
+    callback: function(res){
+      console.log('setAccountInfo', res);
+    }
+  });
 }

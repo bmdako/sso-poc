@@ -64,9 +64,23 @@
         type="text/javascript"
         src="https://cdns.gigya.com/js/gigya.js?apikey=3_rG-TcKCrT5848yGIGAX-LH94oNxO1LEHudCN_frCcluAcB3y5mdEbjPVgqazkGy8"></script> -->
 
+
     <script src="/js/tools.js"></script>
     <script src="/js/hawk/browser.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/anonymous.js"></script>
+    <script>
+      // anonymous.setUrl('http://bpc.local:8085/');
+      // anonymous.setApp('test_sso_app');
+      anonymous.set({
+        url: 'http://bpc.local:8085/',
+        app:'test_sso_app'
+      });
+      anonymous.getPermissions();
+      // .done(function(d){
+      //   console.log('CALL', d);
+      // });
+    </script>
 
   </head>
   <body>

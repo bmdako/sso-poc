@@ -49,9 +49,9 @@ $( document ).ready(function() {
           //   });
           // }
 
-          // anonymous.getTicket()
+          // anonymous.getPermissions()
           // .done(function (data) {
-          //   console.log('getTicket', data);
+          //   console.log('getPermissions', data);
           // });
 
 

@@ -50,19 +50,6 @@ module.exports.register = function (server, options, next) {
           reply(response);
         }
       });
-
-      bpc.request({
-        method: 'POST',
-        path: '/permissions/auid::43b4e88a-f1e6-4f3e-9daa-ba22d961482d/anonymous',
-        payload: {
-          test_boolean: true
-        }
-      },
-      null,
-      function (err, response){
-      // }, function (err, response){
-        console.log('abiba', err, response);
-      });
     }
   });
 

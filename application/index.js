@@ -61,6 +61,11 @@ application.start((err) => {
     throw err;
   }
   console.log(`Application running at: ${application.info.uri}`);
+
+  try {
+    // Running the init-script
+    require('./init');
+  } catch(ex){}
 });
 
 function cb (err) {

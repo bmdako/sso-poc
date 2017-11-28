@@ -53,48 +53,6 @@ $( document ).ready(function() {
           // .done(function (data) {
           //   console.log('getPermissions', data);
           // });
-
-
-          // requestBpc('GET', '/ticket/anonymous?'.concat('app=', bpc_env.app_id), {})
-          // .done(function(response){
-          //   console.log('anonymous ticket', response);
-          //
-          //   var ticket = response;
-          //
-          //   var expiresDate = new Date();
-          //   expiresDate.setMonth(expiresDate.getMonth() + (12 * 15));
-          //   document.cookie = "auid=" + ticket.user + ";expires=" + expiresDate
-          //                   + ";domain=." + document.domain + ";path=/";
-          //   document.cookie = "auti=" + window.btoa(JSON.stringify(ticket)) + ";expires=" + expiresDate
-          //                   + ";domain=." + document.domain + ";path=/";
-          //
-          //   // getUserTicket(response.rsvp)
-          //   // .done(function(ticket) {
-          //   //   console.log('anonymous ticket', ticket);
-          //   // });
-          //   //
-          //   // requestBpc('POST', '/ticket/user', {rsvp: response.rsvp})
-          //   // .done(function(reponse) {
-          //   //   console.log('user cors ticket response', response);
-          //   // });
-          //
-          //   // requestBpc()
-          //   var options = {
-          //     type: 'GET',
-          //     // url: bpc_env.href.concat('me'),
-          //     url: bpc_env.href.concat('permissions/anonymous'),
-          //     headers: {},
-          //     contentType: 'application/json; charset=utf-8'
-          //   };
-          //
-          //   options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
-          //
-          //   $.ajax(options).
-          //   done(function(result) {
-          //     console.log('ME DONE', result);
-          //   });
-          //
-          // });
         }
       }
     });

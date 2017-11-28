@@ -4,6 +4,7 @@
 const Boom = require('boom');
 const Hawk = require('hawk');
 const http = require('http');
+const EventEmitter = require('events');
 const https = require('https');
 const Url = require('url');
 var appTicket = {};
@@ -20,6 +21,8 @@ const BPC_APP_ID = process.env.BPC_APP_ID;
 const BPC_APP_SECRET = process.env.BPC_APP_SECRET;
 
 console.log('Connecting to BPC on', BPC_URL.host, 'AS', BPC_APP_ID);
+
+module.exports.events = new EventEmitter();
 
 module.exports.env = function() {
   return {
@@ -42,6 +45,7 @@ function getAppTicket() {
     } else {
       console.log('Got the appTicket');
       appTicket = result;
+      module.exports.events.emit('ready');
       setTimeout(refreshAppTicket, result.exp - Date.now() - 10000);
     }
   });

@@ -39,15 +39,16 @@ var anonymous = anonymous || (function(){
       }
     },
 
-    getPermissions: function(callback){
-      var req;
+    getAuid: function(){
+      var bpc_auid = readCookie('bpc_auid');
+      return $.when(bpc_auid);
+    },
+
+    getPermissions: function(){
+      var req = jQuery.Deferred();
       getTicket()
       .done(function(ticket){
-        req = requestPermissions(ticket)
-        .done(callback)
-        .done(function(permissions){
-          console.log('Anonymous permissions', permissions);
-        });
+        requestPermissions(ticket).done(req.resolve);
       });
       return req;
     }
@@ -69,25 +70,23 @@ var anonymous = anonymous || (function(){
   }
 
   function getTicket() {
+    var req = jQuery.Deferred();
+
+    let bpc_auti = readCookie('bpc_auti');
+
+    var ticket;
+
     try {
+      ticket = JSON.parse(window.atob(bpc_auti));
+    } catch(err){};
 
-      let bpc_auti = readCookie('bpc_auti');
-      if (bpc_auti === null) {
-        return requestTicket()
-      }
+    if (ticket && ticket.exp > hawk.utils.now()) {
+      req.resolve(ticket);
+    } else {
+      requestTicket().done(req.resolve);
+    }
 
-      var ticket = JSON.parse(window.atob(bpc_auti));
-      if (ticket.exp < hawk.utils.now()) {
-        return requestTicket();
-      } else {
-        return $.when(ticket);
-      }
-
-
-    } catch(err) {
-      console.error('Error when getting ticket', err);
-      return;
-    };
+    return req;
   }
 
 
@@ -96,7 +95,7 @@ var anonymous = anonymous || (function(){
 
     if (_id_app === undefined) {
       console.error('App not set');
-      return;
+      return $.when();
     }
 
     var options = {
@@ -111,17 +110,14 @@ var anonymous = anonymous || (function(){
 
     return $.ajax(options)
     .done(function(ticket, status, jqXHR) {
+      console.log('Got the ticket', ticket);
       var expiresDate = new Date();
       expiresDate.setMonth(expiresDate.getMonth() + (12 * 15));
       document.cookie = "bpc_auid=" + ticket.user + ";expires=" + expiresDate
                       + ";domain=." + document.domain + ";path=/";
       document.cookie = "bpc_auti=" + window.btoa(JSON.stringify(ticket)) + ";expires=" + expiresDate
                       + ";domain=." + document.domain + ";path=/";
-    })
-    .fail(function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
     });
-    return req;
   }
 
   function requestPermissions(ticket) {
@@ -137,12 +133,15 @@ var anonymous = anonymous || (function(){
     let hawkHeader = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app});
     if (hawkHeader.err) {
       console.error(hawkHeader.err);
-      return;
+      return $.when();
     }
 
     options.headers['Authorization'] = hawkHeader.field;
 
-    return $.ajax(options);
+    return $.ajax(options)
+    .done(function(permissions, status, jqXHR) {
+      console.log('Got the permissions', permissions);
+    });
   }
 
 

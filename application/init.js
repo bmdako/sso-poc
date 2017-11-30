@@ -6,12 +6,15 @@ const bpc = require('./bpc_client');
 
 bpc.events.on('ready', function() {
 
-  if(false){
+  console.log('Running init');
+
+  if(true){
     bpc.request({
       method: 'POST',
-      path: '/permissions/auid::43b4e88a-f1e6-4f3e-9daa-ba22d961482d/anonymous',
+      // path: '/permissions/auid**4889e885-3fe8-4261-b490-e0d09b93b218/anonymous',
+      path: '/permissions/auid**3a40e1e3-809f-4d4c-a227-7dd6e212946c/anonymous',
       payload: {
-        test_boolean: true
+        model_banner: 'B'
       }
     },
     null,
@@ -20,5 +23,25 @@ bpc.events.on('ready', function() {
       console.log('abiba', err, response);
     });
   }
-  
+
+  if(false){
+    bpc.request({
+      method: 'GET',
+      path: '/permissions/_guid_dVlIynSm5Mk913pi57uG3j0l7hGnSb7hMy4GlTGJXFU=/berlingske'
+    },
+    null,
+    function (err, response){
+      console.log('ghgh1', err, response);
+    });
+
+    bpc.request({
+      method: 'GET',
+      path: '/permissions/dako@berlingskemedia.dk/berlingske'
+    },
+    null,
+    function (err, response){
+      console.log('ghgh2', err, response);
+    });
+  }
+
 });

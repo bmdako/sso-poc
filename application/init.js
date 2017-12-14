@@ -8,7 +8,7 @@ bpc.events.on('ready', function() {
 
   console.log('Running init');
 
-  if(true){
+  if(false){
     bpc.request({
       method: 'POST',
       // path: '/permissions/auid**4889e885-3fe8-4261-b490-e0d09b93b218/anonymous',
@@ -27,7 +27,8 @@ bpc.events.on('ready', function() {
   if(false){
     bpc.request({
       method: 'GET',
-      path: '/permissions/_guid_dVlIynSm5Mk913pi57uG3j0l7hGnSb7hMy4GlTGJXFU=/berlingske'
+      // path: '/permissions/_guid_dVlIynSm5Mk913pi57uG3j0l7hGnSb7hMy4GlTGJXFU=/berlingske'
+      path: '/permissions/dako@berlingskemedia.dk/weekendavisen'
     },
     null,
     function (err, response){
@@ -41,6 +42,19 @@ bpc.events.on('ready', function() {
     null,
     function (err, response){
       console.log('ghgh2', err, response);
+    });
+  }
+
+  if(false){
+    bpc.request({
+      method: 'GET',
+      // path: '/gigya?email=dako@berlingskemedia.dk'
+      path: '/gigya?email=inmaols@gmail.com.invalid'
+    },
+    null,
+    function (err, response){
+      // }, function (err, response){
+      console.log('gigs', err, response);
     });
   }
 

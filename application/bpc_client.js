@@ -14,7 +14,6 @@ try {
   BPC_URL = Url.parse(process.env.BPC_URL);
 } catch (ex) {
   console.error('Env var BPC_URL missing or invalid.');
-  process.exit(1);
 }
 
 const BPC_APP_ID = process.env.BPC_APP_ID;
@@ -41,7 +40,7 @@ function getAppTicket() {
   callSsoServer({path: '/ticket/app', method: 'POST'}, app, function(err, result){
     if (err){
       console.error(err);
-      process.exit(1);
+      setTimeout(getAppTicket, 1000 * 60 * 5);
     } else {
       console.log('Got the appTicket');
       appTicket = result;

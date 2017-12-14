@@ -56,6 +56,7 @@ function refreshAppTicket(){
   callSsoServer({path: '/ticket/reissue', method: 'POST'}, appTicket, function(err, result){
     if (err){
       console.error('refreshAppTicket:', err);
+      setTimeout(getAppTicket, 1000 * 60 * 5);
     } else {
       console.log('refreshAppTicket', result);
       appTicket = result;

@@ -144,5 +144,33 @@ var anonymous = anonymous || (function(){
     });
   }
 
+  function browserDetection() {
+    //Check if browser is IE
+    if (navigator.userAgent.search("MSIE") > 0) {
+      // insert conditional IE code here
+      console.log('Browser is Internet Explorer');
+    }
+    //Check if browser is Chrome
+    else if (navigator.userAgent.search("Chrome") > 0) {
+      // insert conditional Chrome code here
+      console.log('Browser is Chrome');
+    }
+    //Check if browser is Firefox
+    else if (navigator.userAgent.search("Firefox") > 0) {
+      // insert conditional Firefox Code here
+      console.log('Browser is Firefox');
+    }
+    //Check if browser is Safari
+    else if (navigator.userAgent.search("Safari") > 0 && navigator.userAgent.search("Chrome") < 0) {
+      // insert conditional Safari code here
+      console.log('Browser is Safari');
+    }
+    //Check if browser is Opera
+    else if (navigator.userAgent.search("Opera") > 0) {
+      // insert conditional Opera code here
+      console.log('Browser is Safari');
+    }
+  }
+
 
 }());

@@ -75,6 +75,7 @@ function getBpcEnv(){
     success: function(data, status, jqXHR) {
       console.log('bpc_env', data);
       bpc_env = data;
+      $('#bpc_env').text(JSON.stringify(bpc_env));
     },
     error: function(jqXHR, textStatus, err) {
       console.error(textStatus, err.toString());
@@ -118,6 +119,7 @@ function bpcSignin(accountInfo, callback) {
     console.log('Refreshing ticket');
     refreshUserTicket(callback);
   } else {
+
     requestBpc('GET', '/me', null, function(me){
       console.log('bpc.me', me);
       callback(readTicket());
@@ -508,4 +510,30 @@ function setAccountInfo(){
       console.log('setAccountInfo', res);
     }
   });
+}
+
+function setAnonymousData() {
+
+  const auid = $('#auid').val();
+  const auidField = $('#auidField').val();
+  const auidValue = $('#auidValue').val();
+  let data = {};
+  data[auidField] = auidValue;
+
+  var options = {
+    type: 'POST',
+    url: `/resources/anonymous/${auid}`,
+    contentType: 'application/json; charset=utf-8',
+    data: JSON.stringify(data),
+    success: [
+      function(data, status, jqXHR) {
+        console.log('setAnonymousData', data, status);
+      }
+    ],
+    error: function(jqXHR, textStatus, err) {
+      console.error(textStatus, err.toString());
+    }
+  };
+
+  return $.ajax(options);
 }

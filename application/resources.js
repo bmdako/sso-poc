@@ -125,6 +125,26 @@ module.exports.register = function (server, options, next) {
     }
   });
 
+  server.route({
+    method: 'POST',
+    path: '/anonymous/{auid}',
+    config: {
+      state: {
+        parse: true,
+        failAction: 'log'
+      }
+    },
+    handler: function(request, reply) {
+      bpc.request({
+        method: 'POST',
+        path: `/permissions/${request.params.auid}/anonymous`,
+        payload: request.payload
+      },
+      null,
+      reply);
+    }
+  });
+
   next();
 };
 

@@ -332,7 +332,7 @@ function requestBpc(type, path, payload, callback){
     }
   };
 
-  var ticket = readTicket('ticket');
+  var ticket = readTicket();
   if (ticket !== null){
     options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
   }

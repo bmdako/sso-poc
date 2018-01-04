@@ -48,8 +48,9 @@ bpc.events.on('ready', function() {
   if(false){
     bpc.request({
       method: 'GET',
-      // path: '/gigya?email=dako@berlingskemedia.dk'
-      path: '/gigya?email=inmaols@gmail.com.invalid'
+      path: '/gigya?email=dako@berlingskemedia.dk'
+      // path: '/gigya?email=inmaols@gmail.com.invalid'
+      // path: '/gigya?email=doesnotexists@gmail.com'
     },
     null,
     function (err, response){

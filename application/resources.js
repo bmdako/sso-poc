@@ -25,7 +25,7 @@ module.exports.register = function (server, options, next) {
         method: 'GET',
         // path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
         // path: '/permissions/berlingske'
-        path: '/permissions/berlingske?roles.0.access=calculate'
+        path: '/permissions/berlingske?roles.0.access=yes'
         // payload: {
           // '$inc': { 'tester_tal': 1 }
           // '$mul': { 'tester_tal': 2 }

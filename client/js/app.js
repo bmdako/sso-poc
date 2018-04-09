@@ -113,6 +113,10 @@ function bpcSignin(accountInfo, callback) {
         getUserTicket(response, callback);
       } else if (response.rsvp) {
         getUserTicket(response.rsvp, callback);
+      } else if (response.error){
+        $('#ticket_reponse_error').show();
+        $('#ticket_reponse_error .error').text(response.error);
+        $('#ticket_reponse_error .message').text(response.message);
       }
     });
   } else if(isTicketExpired()){
@@ -528,6 +532,8 @@ function setAnonymousData() {
     success: [
       function(data, status, jqXHR) {
         console.log('setAnonymousData', data, status);
+        // $('#auidField').val('');
+        $('#auidValue').val('');
       }
     ],
     error: function(jqXHR, textStatus, err) {

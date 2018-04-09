@@ -6,6 +6,16 @@ const bpc = require('./bpc_client');
 
 module.exports.register = function (server, options, next) {
 
+  server.state('test_app_ticket', {
+    // ttl: 1000 * 60 * 60 * 24 * 30, // (one month)
+    ttl: null,
+    isHttpOnly: false,
+    isSecure: false,
+    // isSameSite: false,
+    path: '/',
+    encoding: 'base64json'
+  });
+
   server.route({
     method: 'POST',
     path: '/',

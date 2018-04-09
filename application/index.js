@@ -12,15 +12,6 @@ const Kundeunivers = require('./kundeunivers');
 const application = new Hapi.Server();
 application.connection({ port: process.env.PORT ? process.env.PORT : 8000 });
 
-application.state('test_app_ticket', {
-  ttl: 1000 * 60 * 60 * 24 * 30, // (one month)
-  isHttpOnly: false,
-  isSecure: false,
-  // isSameSite: false,
-  path: '/',
-  encoding: 'base64json'
-});
-
 application.register(Inert, () => {});
 application.register(Resources, { routes: { prefix: '/resources' } }, cb);
 application.register(Newsletters, { routes: { prefix: '/newsletters' } }, cb);

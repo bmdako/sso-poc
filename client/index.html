@@ -7,6 +7,7 @@
     <title>BPC POC</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
+
     <script
       src="https://code.jquery.com/jquery-3.1.1.min.js"
       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
@@ -44,6 +45,8 @@
     <script
       type="text/javascript"
       src="https://cdns.gigya.com/js/gigya.js?apikey=3_Pax_srwZ6L6thNGQ4d8nFGSnCU5AxIrsQo6oR0SQD-yYibdLPKCPl_iZiWVr_0Wu"></script>
+
+
 
     <!-- BERLINGSKEMEDIA TEST -->
     <!-- <script
@@ -240,6 +243,11 @@
       </form>
 
       <h2>Testing area</h2>
+      <div id="ticket_reponse_error" style="display: none;">
+        <p>RSVP error</p>
+        <p>Error: <span class="error"></span></p>
+        <p>Message: <span class="message"></span></p>
+      </div>
       <button type="button" class="btn btn-default" onclick="getResources();">GET resources</button>
       <div>Message: <span id="public-resource"></span></div>
       <br/>

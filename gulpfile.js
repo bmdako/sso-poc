@@ -1,19 +1,19 @@
 const gulp = require('gulp');
 const spawn = require('child_process').spawn;
 
-var application;
+var server;
 
-gulp.task('default', ['start_application', 'watch']);
+gulp.task('default', ['start_server', 'watch']);
 
 
 gulp.task('watch', function(){
-  gulp.watch(['./application/*.js'], ['start_application']);
+  gulp.watch(['./server/*.js'], ['start_server']);
 });
 
 
-gulp.task('start_application', function (){
-  if (application) {
-    application.kill();
+gulp.task('start_server', function (){
+  if (server) {
+    server.kill();
   }
-  application = spawn('node', ['./application/index.js'], {stdio: 'inherit'});
+  server = spawn('node', ['./server/index.js'], {stdio: 'inherit'});
 });

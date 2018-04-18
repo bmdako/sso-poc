@@ -108,4 +108,24 @@ bpc.events.on('ready', function() {
     });
   }
 
+  // bt automated access
+  // btdk-test+automation@berlingskemedia.dk
+  // 0f597f01985a4e2682fe4521e2bd6de2
+  if (false) {
+    bpc.request({
+      method: 'POST',
+      path: '/permissions/0f597f01985a4e2682fe4521e2bd6de2/bt',
+      payload: {
+        roles:[{"access":"yes","weekday_rule":"always","weekday_pattern":127,"role":"Plus member","type":"company","entity_id":"berlingske"}],
+        "bta_epaper": "no",
+        "bt_light": "no",
+        "Plus member":	"yes"
+      }
+    },
+    null,
+    function (err, response){
+      console.log('POST bt automated access', err, response);
+    });
+  }
+
 });

@@ -23,9 +23,9 @@ module.exports.register = function (server, options, next) {
 
       bpc.request({
         method: 'GET',
-        // path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
+        path: '/permissions/'.concat(request.state.test_app_ticket.user, '/berlingske'),
         // path: '/permissions/berlingske'
-        path: '/permissions/berlingske?roles.0.access=yes'
+        // path: '/permissions/berlingske?roles.0.access=yes'
         // payload: {
           // '$inc': { 'tester_tal': 1 }
           // '$mul': { 'tester_tal': 2 }
@@ -37,7 +37,7 @@ module.exports.register = function (server, options, next) {
           // }
         // }
       },
-      request.state.test_app_ticket,
+      // request.state.test_app_ticket,
       function (err, response){
       // }, function (err, response){
         console.log('tester_tal', err, response);

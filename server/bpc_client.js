@@ -10,6 +10,8 @@ const Url = require('url');
 var appTicket = {};
 var BPC_URL;
 
+module.exports.appTicket = appTicket;
+
 try {
   BPC_URL = Url.parse(process.env.BPC_URL);
 } catch (ex) {
@@ -94,10 +96,6 @@ module.exports.setUserPermissions = function(user, permission, payload, callback
 };
 
 
-module.exports.me = function(userTicket, callback){
-  callSsoServer({path: '/me', method: 'GET'}, userTicket, callback);
-};
-
 module.exports.bewit = function(uri, credentials){
   const duration = 60 * 5;      // 5 Minutes
   const bewit = Hawk.uri.getBewit(uri, { credentials: credentials, ttlSec: duration, ext: 'dd' });
@@ -143,7 +141,7 @@ function callSsoServer(options, credentials, callback) {
       console.error(hawkHeader.err);
       return callback(new Error('Hawk header: ' + hawkHeader.err));
     }
-
+console.log(hawkHeader.field)
     options.headers = {
       'Authorization': hawkHeader.field
     };

@@ -107,7 +107,7 @@ function bpcSignin(accountInfo, callback) {
       callback(ticket);
     });
   } else if(missingTicket()){
-    requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', accountInfo.UID, '&UIDSignature=', encodeURIComponent(accountInfo.UIDSignature), '&signatureTimestamp=', accountInfo.signatureTimestamp, '&email=', accountInfo.profile.email), {}, function(response){
+    requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', accountInfo.UID, '&UIDSignature=', encodeURIComponent(accountInfo.UIDSignature), '&signatureTimestamp=', accountInfo.signatureTimestamp), {}, function(response){
       console.log('RSVP', response);
       if (typeof response === 'string') {
         getUserTicket(response, callback);
@@ -124,8 +124,8 @@ function bpcSignin(accountInfo, callback) {
     refreshUserTicket(callback);
   } else {
 
-    requestBpc('GET', '/me', null, function(me){
-      console.log('bpc.me', me);
+    requestBpc('GET', '/permissions', null, function(me){
+      console.log('bpc.permissions', me);
       callback(readTicket());
       if (me && me.statusCode === 401){
       } else {

@@ -3,10 +3,22 @@
 
 
 const bpc = require('./bpc_client');
+const ku = require('./kundeunivers_client');
 
 bpc.events.on('ready', function() {
 
   console.log('Running init');
+
+  if(false) {
+    ku.request('DELETE', '/my/kundeunivers_user/7d1e3ba250584eafbace0a61c9159768',
+      null,
+      bpc.appTicket,
+      function(err, res) {
+        console.log('dASDAS')
+        console.log(err, res);
+      }
+    )
+  }
 
   if(false){
     bpc.request({

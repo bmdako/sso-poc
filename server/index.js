@@ -8,6 +8,7 @@ const Resources = require('./resources');
 const Newsletters = require('./newsletters');
 const Tickets = require('./tickets');
 const Kundeunivers = require('./kundeunivers');
+const Init = require('./init');
 
 const application = new Hapi.Server();
 application.connection({ port: process.env.PORT ? process.env.PORT : 8000 });

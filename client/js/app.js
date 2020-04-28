@@ -1,6 +1,9 @@
 
-var bpc_env;
-getBpcEnv();
+const bpc_env = {
+  app: 'test_sso_app',
+  // href: 'https://bpc.berlingskemedia-testing.net/'
+  href: 'http://bpc.local:8085/'
+};
 
 // The function to run on the gigya onLogin event
 function onLoginEventHandler(response) {
@@ -15,26 +18,42 @@ function onLogoutEventHandler(response){
   deleteUserTicket(); // Also reloads the page
 }
 
-function bpcSigninEventHandler(ticket){
-  var returnUrl = getUrlVar('returnUrl');
-  if (returnUrl) {
-    window.location.href = returnUrl;
-    return;
-  }
-}
+// function bpcSigninEventHandler(ticket){
+//   var returnUrl = getUrlVar('returnUrl');
+//   if (returnUrl) {
+//     window.location.href = returnUrl;
+//     return;
+//   }
+// }
 
 
 $( document ).ready(function() {
   var pwrt = getUrlVar('pwrt');
 
   if (pwrt) {
-    $('#resetPasswordContainer').show();
-  } else {
-    gigya.accounts.getAccountInfo({
-      callback: function(response){
-        console.log('accounts.getAccountInfo', response);
 
+    $('#resetPasswordContainer').show();
+
+  } else {
+
+
+    runAnonymous();
+
+    reissueUserTicket();
+
+    gigya.accounts.getAccountInfo({
+      callback: function(response) {
+        console.log('accounts.getAccountInfo', response);
+        
         if (response.status === 'OK') {
+          
+          gigya.accounts.getJWT({
+            callback: function(response) {
+              console.log('accounts.getJWT', response);
+              bpcSigninJWT(response);
+            }
+          });
+
           showProfileContainer(response);
           bpcSignin(response);
 
@@ -42,17 +61,6 @@ $( document ).ready(function() {
         } else if (response.status === 'FAIL') {
           $('#loginContainer').show();
 
-          // if (Fingerprint2) {
-          //   new Fingerprint2().get(function(result, components){
-          //     console.log(result); //a hash, representing your device fingerprint
-          //     console.log(components); // an array of FP components
-          //   });
-          // }
-
-          // anonymous.getPermissions()
-          // .done(function (data) {
-          //   console.log('getPermissions', data);
-          // });
         }
       }
     });
@@ -65,21 +73,34 @@ gigya.accounts.addEventHandlers({ onLogout: onLogoutEventHandler});
 
 
 
-// It's a pretty messy code. But it shows the flow.
+function runAnonymous() {
 
-
-function getBpcEnv(){
-  return $.ajax({
-    type: 'GET',
-    url: '/bpc_env',
-    success: function(data, status, jqXHR) {
-      console.log('bpc_env', data);
-      bpc_env = data;
-      $('#bpc_env').text(JSON.stringify(bpc_env));
-    },
-    error: function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
-    }
+  // fetch(new Request(`https://bpc.berlingskemedia-testing.net/au/ticket?app=aiu_test`), {
+  // fetch(new Request(`${ bpc_env.href }au/ticket?app=aiu_test`), {
+  fetch(new Request(`${ bpc_env.href }au/ticket`), {
+    // credentials: 'include',
+    // mode: 'cors'
+  })
+  .then(response => {
+    return response.json()
+    .then(ticket => {
+      console.log('aiu_test ticket', ticket)
+      var expiresDate = new Date();
+      expiresDate.setMonth(expiresDate.getMonth() + (12)); // One year
+      // document.cookie = `${ ticket.app }_auti=${ window.btoa(JSON.stringify(ticket)) };expires=${ expiresDate }`
+      document.cookie = `${ ticket.app }_ticket=${ window.btoa(JSON.stringify(ticket)) };expires=${ expiresDate }`
+    });
+  })
+  .then(() => {
+    console.log('reqwuest fdsfds')
+    fetch(new Request('/resources'))
+    .then(response => response.json())
+    .then(json => {
+      console.log('a', json)
+    });
+  })
+  .catch(error => {
+    console.error(error);
   });
 }
 
@@ -94,102 +115,129 @@ function showProfileContainer(accountInfo) {
 }
 
 
-function bpcSignin(accountInfo, callback) {
-  if (callback === undefined || typeof callback !== 'function'){
-    callback = bpcSigninEventHandler;
+function bpcSigninJWT(response) {
+
+  // console.log(response.id_token);
+  // console.log(window.atob(response.id_token))
+
+  function sanitizeAndBase64Decode(input)
+  {
+    // $str = str_replace(['-','_'], ['+','/'], $str);
+    // const temp = input.replace(new RegExp('-', 'g'), '_').replace(new RegExp('+', 'g'), '/');
+    // console.log('input', input)
+    const temp = input.replace(/-/g, '_');
+    // console.log('temp', temp)
+    const temp2 = temp.replace(/\+/g, '/');
+    // console.log('temp2', temp2)
+    return temp2;
+    // return window.atob(temp2);
+    // return JSON.parse(window.atob(temp));
   }
 
-  var rsvp = getUrlVar('rsvp');
+  const temp = response.id_token.split(".");
 
-  if (rsvp){
-    getUserTicket(rsvp, function(ticket){
-      removeUrlVar('rsvp');
-      callback(ticket);
-    });
-  } else if(missingTicket()){
-    requestBpc('GET', '/rsvp?'.concat('app=', bpc_env.app_id, '&UID=', accountInfo.UID, '&UIDSignature=', encodeURIComponent(accountInfo.UIDSignature), '&signatureTimestamp=', accountInfo.signatureTimestamp), {}, function(response){
-      console.log('RSVP', response);
-      if (typeof response === 'string') {
-        getUserTicket(response, callback);
-      } else if (response.rsvp) {
-        getUserTicket(response.rsvp, callback);
-      } else if (response.error){
-        $('#ticket_reponse_error').show();
-        $('#ticket_reponse_error .error').text(response.error);
-        $('#ticket_reponse_error .message').text(response.message);
-      }
-    });
-  } else if(isTicketExpired()){
-    console.log('Refreshing ticket');
-    refreshUserTicket(callback);
-  } else {
+  const header = temp[0];
+  const payload = temp[1];
+  const tokenData = header + payload;
+  const keySignature = temp[2].replace(/-/g, '_').replace(/\+/g, '/');
+  console.log('tokenData', tokenData)
+  console.log('keySignature', keySignature)
+  
+  const k2 = sanitizeAndBase64Decode(keySignature);
+  const n = "qoQah4MFGYedrbWwFc3UkC1hpZlnB2_E922yRJfHqpq2tTHL_NvjYmssVdJBgSKi36cptKqUJ0Phui9Z_kk8zMPrPfV16h0ZfBzKsvIy6_d7cWnn163BMz46kAHtZXqXhNuj19IZRCDfNoqVVxxCIYvbsgInbzZM82CB86iYPAS7piijYn1S6hueVHGAzQorOetZevKIAvbH3kJXZ4KdY6Ffz5SFDJBxC3bycN4q2JM1qnyD53vcc0MitxyIUF7a06iJb5_xXBiA-3xnTI0FU5hw_k6x-sdB5Rglx13_2aNzdWBSBAnxs1XXtZUt9_2RAUxP1XORkrBGlPg9D7cBtQ";
+  const n2 = sanitizeAndBase64Decode(n);
+  const e = "AQAB";
+  const e2 = sanitizeAndBase64Decode(e);
+  console.log('k2', k2)
+  console.log('n2', n2)
+  console.log('e2', e2)
 
-    requestBpc('GET', '/permissions', null, function(me){
-      console.log('bpc.permissions', me);
-      callback(readTicket());
-      if (me && me.statusCode === 401){
-      } else {
-      }
-    });
-  }
+
+
+  console.log(window.atob(tokenData))
+  console.log('keySignature', keySignature)
+  // console.log(window.atob(a[1]))
+  // console.log(window.atob(a[2]))
 
   return;
+
+  // const payload = {
+  //   id_token: input.id_token,
+  //   UIDSignature: accountInfo.UIDSignature,
+  //   signatureTimestamp: accountInfo.signatureTimestamp,
+  // };
+
+  // return fetch(new Request('/authenticate',
+  //   {
+  //     method: 'POST',
+  //     body: JSON.stringify(payload)
+  //   }
+  // ))
+  // .then(response => console.log('JWT auth', response));
+
 }
 
 
-function getUserTicket(rsvp, callback){
-  return $.ajax({
-    type: 'POST',
-    url: '/tickets',
-    contentType: 'application/json; charset=utf-8',
-    data: JSON.stringify({rsvp: rsvp}),
-    success: [
-      function(userTicket, status, jqXHR) {
-        console.log('POST ticket sucess', userTicket, status);
-      },
-      callback
-    ],
-    error: function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
+function bpcSignin(accountInfo) {
+
+  const payload = {
+    UID: accountInfo.UID,
+    UIDSignature: accountInfo.UIDSignature,
+    signatureTimestamp: accountInfo.signatureTimestamp,
+  };
+
+  return fetch(new Request('/authenticate',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload)
     }
+  ))
+  .then(response => userTicketReponseHandler(response));
+
+}
+
+
+function reissueUserTicket(){
+  return fetch(new Request('/authenticate',
+    {
+      method: 'GET'
+    }
+  ))
+  .then(response => userTicketReponseHandler(response))
+  .catch(err => {
+
   });
 }
 
 
-function refreshUserTicket(callback){
-  return $.ajax({
-    type: 'GET',
-    url: '/tickets',
-    success: [
-      function(data, status, jqXHR) {
-        console.log('reissue', data, status);
-        location.reload();
-      },
-      callback
-    ],
-    error: function(jqXHR, textStatus, err) {
-      console.log('Refresh user ticket failed');
-      console.error(textStatus, err.toString());
-      // deleteTicket();
-    }
-  });
+function userTicketReponseHandler(response) {
+  if(response.ok) {
+    response
+    .json()
+    .then(userTicket => {
+      setTimeout(reissueUserTicket, userTicket.exp - Date.now() - 1000);
+      return Promise.resolve(userTicket);
+    });
+  } else {
+    setTimeout(reissueUserTicket, 10 * 1000); // Ten seconds
+    return Promise.reject()
+  }
 }
 
 
-function deleteUserTicket(callback){
-  // This is not a global signout.
-  return $.ajax({
-    type: 'DELETE',
-    url: '/tickets',
-    success: [
-      function(data, status, jqXHR) {
-        console.log('DELETE ticket sucess', data, status);
-        location.reload();
-      },
-      callback
-    ],
-    error: function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
+
+// This is not a global signout.
+function deleteUserTicket(){
+  return fetch(new Request('/authenticate',
+    {
+      method: 'DELETE'
+    }
+  ))
+  .then(response => {
+    if (response.error){
+      console.error(response.error);
+    } else {
+      location.reload();
     }
   });
 }
@@ -306,45 +354,45 @@ function changePassword(event){
 
 
 
-function requestBpc(type, path, payload, callback){
-  if (callback === undefined && typeof path === 'function'){
-    callback = path;
-    path = ''; // <- We don't need a slash (/) here
-  }
+// function requestBpc(type, path, payload, callback){
+//   if (callback === undefined && typeof path === 'function'){
+//     callback = path;
+//     path = ''; // <- We don't need a slash (/) here
+//   }
 
-  if (callback === undefined) {
-    callback = function(){};
-  }
+//   if (callback === undefined) {
+//     callback = function(){};
+//   }
 
-  if (path.startsWith('/')){
-    path = path.substring(1);
-  }
+//   if (path.startsWith('/')){
+//     path = path.substring(1);
+//   }
 
-  var options = {
-    type: type,
-    url: bpc_env.href.concat(path),
-    headers: {},
-    contentType: 'application/json; charset=utf-8',
-    data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,
-    xhrFields: {
-      withCredentials: true
-    },
-    success: [
-      callback
-    ],
-    error: function(jqXHR, textStatus, err) {
-      console.error(textStatus, err.toString());
-      callback(jqXHR.responseJSON);
-    }
-  };
+//   var options = {
+//     type: type,
+//     url: bpc_env.href.concat(path),
+//     headers: {},
+//     contentType: 'application/json; charset=utf-8',
+//     data: ['POST', 'PUT'].indexOf(type) > -1 && payload !== null ? JSON.stringify(payload) : null,
+//     xhrFields: {
+//       withCredentials: true
+//     },
+//     success: [
+//       callback
+//     ],
+//     error: function(jqXHR, textStatus, err) {
+//       console.error(textStatus, err.toString());
+//       callback(jqXHR.responseJSON);
+//     }
+//   };
 
-  var ticket = readTicket();
-  if (ticket !== null){
-    options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
-  }
+//   var ticket = readTicket();
+//   if (ticket !== null){
+//     options.headers['Authorization'] = hawk.client.header(options.url, options.type, {credentials: ticket, app: ticket.app}).field
+//   }
 
-  return $.ajax(options);
-}
+//   return $.ajax(options);
+// }
 
 
 

@@ -4,17 +4,20 @@
   "description": "NEW SSO POC",
   "main": "server/index.js",
   "dependencies": {
-    "hapi": "^15.2.0",
-    "hawk": "^6.0.1",
-    "inert": "^4.0.2",
-    "iron": "^4.0.4",
-    "joi": "^9.2.0"
+    "@hapi/boom": "^7.4.2",
+    "@hapi/hapi": "^18.3.1",
+    "@hapi/hawk": "^7.1.0",
+    "@hapi/inert": "^5.2.0",
+    "@hapi/iron": "^5.1.0",
+    "@hapi/joi": "^15.0.3",
+    "hapi-bpc": "^3.1.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1"
+    "nodemon": "^1.19.1"
   },
   "scripts": {
     "start": "node $npm_package_main",
+    "dev": "npx nodemon --inspect --ignore 'client/' server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

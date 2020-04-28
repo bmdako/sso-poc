@@ -23,6 +23,18 @@ bpc.events.on('ready', function() {
   if(false){
     bpc.request({
       method: 'POST',
+      path: '/ticket/reissue'
+    },
+    null,
+    function (err, response){
+      // }, function (err, response){
+      console.log('reissue', err, response);
+    });
+  }
+
+  if(false){
+    bpc.request({
+      method: 'POST',
       // path: '/permissions/auid**4889e885-3fe8-4261-b490-e0d09b93b218/anonymous',
       // path: '/permissions/auid**3a40e1e3-809f-4d4c-a227-7dd6e212946c/anonymous',
       path: '/permissions/auid**707143b8-155b-4b00-bf4a-1124169a8d02/anonymous',
@@ -82,6 +94,18 @@ bpc.events.on('ready', function() {
     function (err, response){
       // }, function (err, response){
       console.log('gigs', err, response);
+    });
+  }
+
+
+  if(false){
+    bpc.request({
+      method: 'GET',
+      path: '/gigya?email=Otto@corleone.com'
+    },
+    null,
+    function (err, response){
+      console.log('Otto', err, response);
     });
   }
 
